@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaSbtSettings">
+    <option name="linkedExternalProjectsSettings">
+      <SbtProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/hs-akka-http" />
+            <option value="$PROJECT_DIR$/hs-akka-http-cache" />
+            <option value="$PROJECT_DIR$/hs-akka-http-cache/project" />
+            <option value="$PROJECT_DIR$/hs-akka-http-core" />
+            <option value="$PROJECT_DIR$/hs-akka-http-core/project" />
+            <option value="$PROJECT_DIR$/hs-akka-http-session" />
+            <option value="$PROJECT_DIR$/hs-akka-http-session/project" />
+            <option value="$PROJECT_DIR$/hs-akka-http/project" />
+            <option value="$PROJECT_DIR$/hs-core" />
+            <option value="$PROJECT_DIR$/hs-core/project" />
+            <option value="$PROJECT_DIR$/hs-discovery" />
+            <option value="$PROJECT_DIR$/hs-discovery/project" />
+            <option value="$PROJECT_DIR$/hs-doc" />
+            <option value="$PROJECT_DIR$/hs-doc/project" />
+            <option value="$PROJECT_DIR$/hs-http-client" />
+            <option value="$PROJECT_DIR$/hs-http-client/project" />
+            <option value="$PROJECT_DIR$/hs-inject" />
+            <option value="$PROJECT_DIR$/hs-inject-test" />
+            <option value="$PROJECT_DIR$/hs-inject-test/project" />
+            <option value="$PROJECT_DIR$/hs-inject/project" />
+            <option value="$PROJECT_DIR$/hs-jdbc" />
+            <option value="$PROJECT_DIR$/hs-jdbc/project" />
+            <option value="$PROJECT_DIR$/hs-nosql" />
+            <option value="$PROJECT_DIR$/hs-nosql/project" />
+            <option value="$PROJECT_DIR$/hs-slick" />
+            <option value="$PROJECT_DIR$/hs-slick/project" />
+            <option value="$PROJECT_DIR$/hs-starter-nosql" />
+            <option value="$PROJECT_DIR$/hs-starter-nosql/project" />
+            <option value="$PROJECT_DIR$/hs-swagger-akka-http" />
+            <option value="$PROJECT_DIR$/hs-swagger-akka-http/project" />
+            <option value="$PROJECT_DIR$/hs-test" />
+            <option value="$PROJECT_DIR$/hs-test/project" />
+            <option value="$PROJECT_DIR$/project" />
+          </set>
+        </option>
+        <option name="sbtVersion" value="1.0.4" />
+        <option name="useSbtShell" value="true" />
+      </SbtProjectSettings>
+    </option>
+    <option name="maximumHeapSize" value="2048" />
+    <option name="vmParameters" value="" />
+  </component>
+</project>
