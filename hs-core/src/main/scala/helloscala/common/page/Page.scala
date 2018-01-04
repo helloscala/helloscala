@@ -1,6 +1,6 @@
 package helloscala.common.page
 
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.UUID
 
 import org.apache.commons.lang3.StringUtils
@@ -44,9 +44,9 @@ trait Pager[T] {
 }
 
 case class PageInput(
-  @BeanProperty page: Int,
-  @BeanProperty size: Int,
-  @BeanProperty params: Map[String, Any] = Map()) extends Page {
+    @BeanProperty page: Int,
+    @BeanProperty size: Int,
+    @BeanProperty params: Map[String, Any] = Map()) extends Page {
 
   def toParamSeq: List[(String, Any)] = ("page", page) :: ("size", size) :: params.toList
 
@@ -68,47 +68,49 @@ case class PageInput(
       .flatMap {
         case d: Double => Some(d)
         case s: String => Try(s.toDouble).toOption
-        case v => None
+        case v         => None
       }
 
   def getBoolean(key: String): Option[Boolean] =
     params.get(key)
       .flatMap {
         case b: Boolean => Some(b)
-        case s: String => Try(s.toBoolean).toOption
-        case _ => None
+        case s: String  => Try(s.toBoolean).toOption
+        case _          => None
       }
 
   def getInt(key: String): Option[Int] =
     params.get(key)
       .flatMap {
-        case i: Int => Some(i)
-        case l: Long => Some(l.toInt)
+        case i: Int    => Some(i)
+        case l: Long   => Some(l.toInt)
         case s: String => Try(s.toInt).toOption
-        case _ => None
+        case _         => None
       }
 
   def getLong(key: String): Option[Long] =
     params.get(key)
       .flatMap {
-        case l: Long => Some(l)
-        case i: Int => Some(i.toLong)
+        case l: Long   => Some(l)
+        case i: Int    => Some(i.toLong)
         case s: String => Try(s.toLong).toOption
-        case _ => None
+        case _         => None
       }
 
   def getString(key: String): Option[String] =
     params.get(key)
       .flatMap {
         case s: String if StringUtils.isNoneBlank(s) => Some(s)
-        case _ => None
+        case _                                       => None
       }
 
 }
 
 object PageInput {
 
-  def applyBasic(page: Int, size: Int): PageInput = PageInput(page, size)
+  val default = PageInput(Page.DEFAULT_PAGE, Page.DEFAULT_SIZE)
+
+  def apply(params: Map[String, Any]): PageInput = PageInput(Page.DEFAULT_SIZE, Page.DEFAULT_SIZE, params)
 
 }
 
@@ -123,19 +125,19 @@ trait PageResult[T] extends Page {
 object PageResult {
 
   def apply[T](
-    page: Int,
-    size: Int,
-    content: Seq[T],
-    totalElements: Int): PageResult[T] =
+      page: Int,
+      size: Int,
+      content: Seq[T],
+      totalElements: Int): PageResult[T] =
     DefaultPageResult(page, size, content, totalElements)
 
 }
 
 case class DefaultPageResult[T](
-  @BeanProperty page: Int,
-  @BeanProperty size: Int,
-  @BeanProperty content: Seq[T],
-  @BeanProperty totalElements: Long) extends PageResult[T] {
+    @BeanProperty page: Int,
+    @BeanProperty size: Int,
+    @BeanProperty content: Seq[T],
+    @BeanProperty totalElements: Long) extends PageResult[T] {
 
   override def toString = s"DefaultPageResult($page, $size, $content, $totalElements, $totalPages)"
 }

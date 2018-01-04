@@ -6,8 +6,7 @@ import java.nio.charset.StandardCharsets
 import com.fasterxml.jackson.annotation.JsonIgnore
 import helloscala.common.util.StringUtils
 
-import scala.language.implicitConversions
-import scala.util.{ Failure, Try }
+import scala.util.{Failure, Try}
 
 /**
  * BSON ObjectId value.
@@ -30,7 +29,7 @@ class ObjectId private (private val raw: Array[Byte]) extends Serializable with 
 
   override def equals(that: Any): Boolean = that match {
     case other: ObjectId => java.util.Arrays.equals(raw, other.raw)
-    case _ => false
+    case _               => false
   }
 
   @JsonIgnore
@@ -112,7 +111,7 @@ object ObjectId {
    */
   def apply(id: String): ObjectId = parse(id) match {
     case scala.util.Success(value) => value
-    case scala.util.Failure(e) => throw e
+    case scala.util.Failure(e)     => throw e
   }
 
   def apply(array: Array[Byte]): ObjectId = {

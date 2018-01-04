@@ -12,6 +12,7 @@ import helloscala.common.types.ObjectId
 import helloscala.common.util.StringUtils
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
@@ -52,6 +53,10 @@ case class Configuration(underlying: Config) {
    */
   def has(path: String): Boolean = underlying.hasPath(path)
 
+  def getConfiguration(path: String): Configuration = get[Configuration](path)
+
+  def getConfig(path: String): Config = get[Config](path)
+
   def getArray(path: String): Array[String] = get[Array[String]](path)
 
   def getString(path: String): String = get[String](path)
@@ -60,9 +65,15 @@ case class Configuration(underlying: Config) {
 
   def getInt(s: String): Int = underlying.getInt(s)
 
-  def getDuration(path: String) = underlying.getDuration(path)
+  def getDuration(path: String): java.time.Duration = underlying.getDuration(path)
 
   def getOptionString(path: String): Option[String] = get[Option[String]](path)
+
+  def getProperties(path: String): Properties = get[Properties](path)
+
+  def getMap(path: String): Map[String, String] = get[Map[String, String]](path)
+
+  def getJavaMap(path: String): java.util.Map[String, String] = get[java.util.Map[String, String]](path)
 
   /**
    * Get the config at the given path.
@@ -317,14 +328,42 @@ object ConfigLoader {
       }
     }
 
-  implicit def mapLoader[A](implicit valueLoader: ConfigLoader[A]): ConfigLoader[Map[String, A]] =
-    new ConfigLoader[Map[String, A]] {
-      override def load(config: Config, path: String): Map[String, A] = {
+  implicit val scalaMapLoader: ConfigLoader[Map[String, String]] =
+    new ConfigLoader[Map[String, String]] {
+
+      def make(props: mutable.Map[String, String], parentKeys: String, obj: ConfigObject): Unit = {
+        obj.keySet().forEach(new Consumer[String] {
+          override def accept(key: String): Unit = {
+            val value = obj.get(key)
+            val propKey = if (StringUtils.isNoneBlank(parentKeys)) parentKeys + "." + key else key
+            value.valueType() match {
+              case ConfigValueType.OBJECT =>
+                make(props, propKey, value.asInstanceOf[ConfigObject])
+              case _ =>
+                props.put(propKey, value.unwrapped().toString)
+            }
+          }
+        })
+      }
+
+      override def load(config: Config, path: String): Map[String, String] = {
         val obj = config.getObject(path)
-        val conf = obj.toConfig
-        obj.keySet().asScala.map { key =>
-          key -> valueLoader.load(conf, key)
-        }.toMap
+        val props = mutable.Map[String, String]()
+        make(props, "", obj)
+        props.toMap
       }
     }
+
+  implicit val javaMapLoader: ConfigLoader[java.util.Map[String, String]] = scalaMapLoader.map(v => v.asJava)
+
+  //  implicit def mapLoader[A](implicit valueLoader: ConfigLoader[A]): ConfigLoader[Map[String, A]] =
+  //    new ConfigLoader[Map[String, A]] {
+  //      override def load(config: Config, path: String): Map[String, A] = {
+  //        val obj = config.getObject(path)
+  //        val conf = obj.toConfig
+  //        obj.keySet().asScala.map { key =>
+  //          key -> valueLoader.load(conf, key)
+  //        }.toMap
+  //      }
+  //    }
 }

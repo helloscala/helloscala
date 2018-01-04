@@ -9,9 +9,10 @@ lazy val root = Project(id = "helloscala-root", base = file("."))
     hsInject,
     hsDoc,
     hsAkkaHttp,
-    hsSwaggerAkkaHttp,
     hsAkkaHttpCache,
     hsAkkaHttpSession,
+    hsSwaggerAkkaHttp,
+    hsHttpClient,
     hsAkkaHttpCore,
     hsNosql,
     hsSlick,
@@ -149,8 +150,8 @@ lazy val hsCore = coreProject("hs-core")
       _junit4 % Test,
       _guava,
       _logbackClassic,
-      "org.scala-lang" % "scala-library" % Dependencies.versionScala,
-      "org.scala-lang" % "scala-reflect" % Dependencies.versionScala,
+      "org.scala-lang" % "scala-library" % scalaVersion.value,
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       _typesafeConfig
     ) ++ _akka ++ _jackson
   )

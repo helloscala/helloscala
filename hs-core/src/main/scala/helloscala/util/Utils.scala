@@ -5,13 +5,15 @@
 package helloscala.util
 
 import java.nio.ByteBuffer
-import java.nio.file.{ Files, Path }
+import java.nio.file.{Files, Path}
 import java.security.SecureRandom
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
+import java.util.Properties
 import java.util.concurrent.ThreadLocalRandom
 
 import org.apache.commons.lang3.StringUtils
 
+import scala.collection.mutable
 import scala.compat.java8.FunctionConverters._
 import scala.util.Try
 import scala.util.matching.Regex
@@ -53,11 +55,11 @@ class Utils extends Serializable {
 
   def parseLong(s: Any): Option[Long] =
     s match {
-      case l: Long => Some(l)
-      case i: Int => Some(i.toLong)
-      case s: String => Try(s.toLong).toOption
+      case l: Long    => Some(l)
+      case i: Int     => Some(i.toLong)
+      case s: String  => Try(s.toLong).toOption
       case bi: BigInt => Some(bi.longValue())
-      case _ => None
+      case _          => None
     }
 
   def isNoneBlank(content: String): Boolean = !isBlank(content)
@@ -115,22 +117,22 @@ class Utils extends Serializable {
   }
 
   def boxed(v: Any): Object = v match {
-    case i: Int => Int.box(i)
-    case l: Long => Long.box(l)
-    case d: Double => Double.box(d)
-    case s: Short => Short.box(s)
-    case f: Float => Float.box(f)
-    case c: Char => Float.box(c)
-    case b: Boolean => Boolean.box(b)
-    case b: Byte => Byte.box(b)
+    case i: Int      => Int.box(i)
+    case l: Long     => Long.box(l)
+    case d: Double   => Double.box(d)
+    case s: Short    => Short.box(s)
+    case f: Float    => Float.box(f)
+    case c: Char     => Float.box(c)
+    case b: Boolean  => Boolean.box(b)
+    case b: Byte     => Byte.box(b)
     case obj: AnyRef => obj
-    case o => o.asInstanceOf[Object]
+    case o           => o.asInstanceOf[Object]
   }
 
   def sqlBoxed(v: Any): Object = v match {
     case ldt: LocalDateTime => TimeUtils.toSqlTimestamp(ldt)
-    case ld: LocalDate => TimeUtils.toSqlDate(ld)
-    case o => o.asInstanceOf[Object]
+    case ld: LocalDate      => TimeUtils.toSqlDate(ld)
+    case o                  => o.asInstanceOf[Object]
   }
 
   def boxedSQL(v: Any): Object = try {
@@ -150,6 +152,14 @@ class Utils extends Serializable {
 
   @inline
   def option[V](v: V): Option[V] = Option(v)
+
+  def propertiesToMap(props: Properties): Map[String, String] = {
+    import scala.collection.JavaConverters._
+    props.stringPropertyNames().asScala
+      .map(name => name -> props.getProperty(name))
+      .toMap
+  }
+
 }
 
 object Utils extends Utils {

@@ -30,8 +30,7 @@ object HttpClient {
       httpHeaders: immutable.Seq[HttpHeader] = Nil,
       data: AnyRef = null,
       protocol: HttpProtocol = HttpProtocols.`HTTP/1.1`,
-      followRedirect: Boolean = true
-  )(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[(String, HttpResponse)] = {
+      followRedirect: Boolean = true)(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[(String, HttpResponse)] = {
     HttpUtils
       .singleRequest(method, uri, params, data, httpHeaders, protocol)
       .flatMap {

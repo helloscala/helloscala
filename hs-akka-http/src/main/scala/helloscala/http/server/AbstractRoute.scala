@@ -1,23 +1,23 @@
 package helloscala.http.server
 
-import java.nio.file.{ Files, Path }
-import java.time.{ LocalDate, LocalDateTime, LocalTime }
+import java.nio.file.{Files, Path}
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.CacheDirectives.{ `no-cache`, `no-store` }
-import akka.http.scaladsl.server.PathMatcher.{ Matched, Unmatched }
+import akka.http.scaladsl.model.headers.CacheDirectives.{`no-cache`, `no-store`}
+import akka.http.scaladsl.server.PathMatcher.{Matched, Unmatched}
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.util.Tuple
-import akka.http.scaladsl.unmarshalling.{ FromRequestUnmarshaller, FromStringUnmarshaller, Unmarshaller }
-import akka.stream.scaladsl.{ FileIO, Sink, Source }
+import akka.http.scaladsl.unmarshalling.{FromRequestUnmarshaller, FromStringUnmarshaller, Unmarshaller}
+import akka.stream.scaladsl.{FileIO, Sink, Source}
 import akka.util.ByteString
 import helloscala.common.data.ApiResult
-import helloscala.common.exception.{ HSBadRequestException, HSException, HSNotFoundException }
-import helloscala.common.page.{ Page, PageInput }
+import helloscala.common.exception.{HSBadRequestException, HSException, HSNotFoundException}
+import helloscala.common.page.{Page, PageInput}
 import helloscala.common.types.ObjectId
-import helloscala.http.{ AkkaHttpSourceQueue, HttpUtils }
-import helloscala.util.{ AsInt, TimeUtils }
+import helloscala.http.{AkkaHttpSourceQueue, HttpUtils}
+import helloscala.util.{AsInt, TimeUtils}
 
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -34,7 +34,7 @@ trait AbstractRoute extends Directives {
   implicit def objectIdFromStringUnmarshaller: FromStringUnmarshaller[ObjectId] =
     Unmarshaller.strict[String, ObjectId] {
       case str if ObjectId.isValid(str) => ObjectId.apply(str)
-      case str => throw HSBadRequestException(s"$str 不是有效的ObjectId字符串")
+      case str                          => throw HSBadRequestException(s"$str 不是有效的ObjectId字符串")
     }
 
   implicit def localDateFromStringUnmarshaller: FromStringUnmarshaller[LocalDate] =
@@ -62,7 +62,7 @@ trait AbstractRoute extends Directives {
   def hsLogRequest(logger: com.typesafe.scalalogging.Logger): Directive0 = mapRequest { req =>
     def entity = req.entity match {
       case HttpEntity.Empty => ""
-      case _ => "\n" + req.entity
+      case _                => "\n" + req.entity
     }
 
     logger.debug(
@@ -112,6 +112,12 @@ trait AbstractRoute extends Directives {
 
   def postEntity[T](um: FromRequestUnmarshaller[T]): Directive1[T] = post & entity(um)
 
+  def completionStageComplete(future: java.util.concurrent.CompletionStage[AnyRef], needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route = {
+    import scala.compat.java8.FutureConverters._
+    val f: AnyRef => Route = objectComplete(_, needContainer, successCode)
+    onSuccess(future.toScala).apply(f)
+  }
+
   def futureComplete(future: Future[AnyRef], needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route = {
     val f: AnyRef => Route = objectComplete(_, needContainer, successCode)
     onSuccess(future).apply(f)
@@ -143,7 +149,7 @@ trait AbstractRoute extends Directives {
       case result: ApiResult =>
         import helloscala.http.jackson.JacksonSupport._
         val status =
-          if (result.getErrCode == null || result.getErrCode == 0) StatusCodes.OK
+          if (result.getErrCode == null || result.getErrCode.equals(0)) StatusCodes.OK
           else if (successCode != StatusCodes.OK) successCode
           else StatusCodes.getForKey(result.getErrCode).getOrElse(StatusCodes.OK)
         complete((status, result))
@@ -171,7 +177,7 @@ trait AbstractRoute extends Directives {
     entity(as[Multipart.FormData])
       .flatMap { formData ⇒
         extractRequestContext.flatMap { ctx ⇒
-          import ctx.{ executionContext, materializer }
+          import ctx.{executionContext, materializer}
 
           val multiPartF = formData.parts
             .map { part =>
@@ -189,7 +195,7 @@ trait AbstractRoute extends Directives {
         }
       }
       .flatMap {
-        case Nil => reject(ValidationRejection("没有任何上传文件"))
+        case Nil  => reject(ValidationRejection("没有任何上传文件"))
         case list => provide(list)
       }
 
@@ -207,7 +213,7 @@ trait AbstractRoute extends Directives {
         }
       }
       .flatMap {
-        case Nil => reject(ValidationRejection("没有任何上传文件"))
+        case Nil  => reject(ValidationRejection("没有任何上传文件"))
         case list => provide(list)
       }
 
@@ -237,9 +243,9 @@ trait AbstractRoute extends Directives {
    * @return
    */
   def restApiTokenProxy(uri: Uri)(
-    implicit
-    appIdKeyTokenConfig: IAppIdKey,
-    sourceQueue: AkkaHttpSourceQueue): Route = {
+      implicit
+      appIdKeyTokenConfig: IAppIdKey,
+      sourceQueue: AkkaHttpSourceQueue): Route = {
     extractRequestContext { ctx =>
       val req = ctx.request
       val request = HttpUtils.applyApiToken(

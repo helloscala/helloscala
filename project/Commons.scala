@@ -18,8 +18,8 @@ object Commons {
     organizationHomepage := Some(url("https://hualongdata.com")),
     homepage := Some(url("http://ig.hualongdata.com")),
     startYear := Some(2017),
-    scalaVersion := Dependencies.versionScala,
-    //    crossScalaVersions := Seq(versionScala, versionScala212),
+    scalaVersion := Dependencies.versionScala211,
+    crossScalaVersions := Seq(Dependencies.versionScala211, Dependencies.versionScala212),
     scalacOptions ++= Seq(
       "-encoding", "UTF-8", // yes, this is 2 args
       "-feature",

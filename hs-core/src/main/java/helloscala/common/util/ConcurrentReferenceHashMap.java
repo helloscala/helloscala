@@ -127,7 +127,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
     }
 
     /**
-     * Create a new {@code ConcurrentReferenceHashMap} instance.
+     * Create a new instance.
      *
      * @param initialCapacity the initial capacity of the map
      * @param referenceType   the reference type used for entries (soft or weak)
@@ -150,7 +150,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
     }
 
     /**
-     * Create a new {@code ConcurrentReferenceHashMap} instance.
+     * Create a new instance.
      *
      * @param initialCapacity  the initial capacity of the map
      * @param loadFactor       the load factor. When the average number of references per
@@ -394,24 +394,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
         }
         return shift;
     }
-
-
-    /**
-     * Various reference types supported by this map.
-     */
-    public enum ReferenceType {
-
-        /**
-         * Use {@link SoftReference}s
-         */
-        SOFT,
-
-        /**
-         * Use {@link WeakReference}s
-         */
-        WEAK
-    }
-
 
     /**
      * A single segment used to divide the map to allow better concurrent performance.
