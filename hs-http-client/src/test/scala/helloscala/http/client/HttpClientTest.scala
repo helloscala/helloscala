@@ -3,7 +3,6 @@ package helloscala.http.client
 import javax.net.ssl.{HostnameVerifier, SSLSession}
 
 import helloscala.test.{AkkaSpec, HelloscalaSpec}
-import okhttp3.internal.tls.OkHostnameVerifier
 import okhttp3.{OkHttpClient, Request}
 
 class HttpClientTest extends HelloscalaSpec with AkkaSpec {

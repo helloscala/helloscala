@@ -2,12 +2,12 @@ package helloscala.http.session
 
 import java.util.concurrent.TimeUnit
 
-import akka.http.scaladsl.model.headers.{ HttpCookie, RawHeader }
-import helloscala.common.aes.{ Crypto, SessionUtil }
+import akka.http.scaladsl.model.headers.{HttpCookie, RawHeader}
+import helloscala.common.aes.{Crypto, SessionUtil}
 import helloscala.http.core.server.SessionRejection
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class SessionManager[T](val config: SessionConfig)(implicit sessionEncoder: SessionEncoder[T]) { manager =>
 
@@ -115,7 +115,7 @@ trait RefreshTokenManager[T] {
     val storeFuture = storage.store(new RefreshTokenData[T](
       forSession = session,
       selector = selector,
-      tokenHash = Crypto.hash_SHA256(token),
+      tokenHash = Crypto.hashSHA256(token),
       expires = nowMillis + config.refreshTokenMaxAgeSeconds * 1000L)).map(_ => encodeSelectorAndToken(selector, token))
 
     existing.flatMap(decodeSelectorAndToken).foreach {
@@ -149,7 +149,7 @@ trait RefreshTokenManager[T] {
           case Some(lookupResult) =>
             if (lookupResult.expires < nowMillis) {
               storage.remove(selector).map(_ => SessionResult.Expired)
-            } else if (!SessionUtil.constantTimeEquals(Crypto.hash_SHA256(token), lookupResult.tokenHash)) {
+            } else if (!SessionUtil.constantTimeEquals(Crypto.hashSHA256(token), lookupResult.tokenHash)) {
               storage.remove(selector).map(_ => SessionResult.Corrupt(new RuntimeException("Corrupt token hash")))
             } else {
               Future.successful(SessionResult.CreatedFromToken(lookupResult.createSession()))
@@ -165,7 +165,7 @@ trait RefreshTokenManager[T] {
   def removeToken(value: String)(implicit ec: ExecutionContext): Future[Unit] = {
     decodeSelectorAndToken(value) match {
       case Some((s, _)) => storage.remove(s)
-      case None => Future.successful(())
+      case None         => Future.successful(())
     }
   }
 }

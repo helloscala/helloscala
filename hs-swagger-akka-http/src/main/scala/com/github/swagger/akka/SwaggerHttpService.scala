@@ -13,16 +13,16 @@
  */
 package com.github.swagger.akka
 
-import akka.http.scaladsl.model.{ HttpEntity, MediaTypes }
-import akka.http.scaladsl.server.{ Directives, PathMatchers, Route }
+import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
+import akka.http.scaladsl.server.{Directives, PathMatchers, Route}
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.swagger.akka.model.{ Info, asScala, scala2swagger }
+import com.github.swagger.akka.model.{Info, asScala, scala2swagger}
 import helloscala.common.jackson.Jackson
 import io.swagger.jaxrs.Reader
 import io.swagger.jaxrs.config.DefaultReaderConfig
 import io.swagger.models.auth.SecuritySchemeDefinition
-import io.swagger.models.{ ExternalDocs, Scheme, Swagger }
-import io.swagger.util.{ DeserializationModule, Yaml }
+import io.swagger.models.{ExternalDocs, Scheme, Swagger}
+import io.swagger.util.{DeserializationModule, Yaml}
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 
@@ -67,7 +67,7 @@ trait SwaggerGenerator {
     swagger.vendorExtensions(vendorExtensions.asJava)
     externalDocs match {
       case Some(ed) => swagger.externalDocs(ed)
-      case None => swagger
+      case None     => swagger
     }
   }
 

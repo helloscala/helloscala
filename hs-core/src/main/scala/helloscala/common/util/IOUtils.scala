@@ -2,20 +2,20 @@
  * 文件/IO 相关帮助函数
  * Created by yangbajing(yangbajing@gmail.com) on 2017-05-12.
  */
-package helloscala.util
+package helloscala.common.util
 
-import java.io.{ IOException, InputStream }
-import java.nio.charset.{ Charset, StandardCharsets }
-import java.nio.file.{ CopyOption, Files, Path }
+import java.io.{IOException, InputStream}
+import java.nio.charset.{Charset, StandardCharsets}
+import java.nio.file.{CopyOption, Files, Path}
 import java.util.zip.ZipInputStream
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.{ Source, StreamConverters }
+import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 
 import scala.annotation.varargs
 import scala.collection.mutable
-import scala.concurrent.duration.{ FiniteDuration, _ }
+import scala.concurrent.duration._
 
 class IOUtils {
 
@@ -28,8 +28,8 @@ class IOUtils {
   }
 
   def readLine(
-    bytes: Source[ByteString, Any],
-    charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[String] = {
+      bytes: Source[ByteString, Any],
+      charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[String] = {
     val in = bytes.runWith(StreamConverters.asInputStream(readTimeout))
     try {
       scala.io.Source.fromInputStream(in, charset.name()).getLines().toVector
@@ -39,8 +39,8 @@ class IOUtils {
   }
 
   def readAllContentsFromZipBySource(
-    bytes: Source[ByteString, Any],
-    charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[(String, String)] = {
+      bytes: Source[ByteString, Any],
+      charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[(String, String)] = {
     val in = bytes.runWith(StreamConverters.asInputStream(readTimeout))
     readAllContentsFromZip(in, charset)
   }

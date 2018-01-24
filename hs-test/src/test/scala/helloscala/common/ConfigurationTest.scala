@@ -3,7 +3,7 @@ package helloscala.common
 import java.util.Properties
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
 /**
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-06.

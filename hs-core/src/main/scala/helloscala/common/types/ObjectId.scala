@@ -105,6 +105,12 @@ object ObjectId {
 
   //  implicit def string2ObjectId(id: String): ObjectId = apply(id)
 
+  // Java API
+  def create(id: String): ObjectId = apply(id)
+
+  // Java API
+  def create(array: Array[Byte]): ObjectId = apply(array)
+
   /**
    * Constructs a BSON ObjectId element from a hexadecimal String representation.
    * Throws an exception if the given argument is not a valid ObjectID.
@@ -124,7 +130,7 @@ object ObjectId {
 
   /** Tries to make a BSON ObjectId from a hexadecimal string representation. */
   def parse(id: String): Try[ObjectId] = {
-    if (isValid(id)) Try(new ObjectId(Converters str2Hex id))
+    if (isValid(id)) Try(new ObjectId(Converters.str2Hex(id)))
     else Failure(new IllegalArgumentException(s"Wrong ObjectId (It is not a valid 16 Decimal 24 bit string): '$id'"))
   }
 

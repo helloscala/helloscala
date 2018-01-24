@@ -1,9 +1,9 @@
-package helloscala.util
+package helloscala.common.util
 
-import java.net.{ URI, URL }
+import java.net.{URI, URL}
 
-import java.nio.file.{ DirectoryStream, Files, Path, Paths }
-import java.util.zip.{ ZipEntry, ZipFile }
+import java.nio.file.{DirectoryStream, Files, Path, Paths}
+import java.util.zip.{ZipEntry, ZipFile}
 
 import com.typesafe.scalalogging.StrictLogging
 

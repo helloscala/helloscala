@@ -1,4 +1,4 @@
-package helloscala.util
+package helloscala.common.util
 
 import org.scalatest.WordSpec
 

@@ -1,6 +1,6 @@
 package helloscala.http.session
 
-import helloscala.common.aes.{ Crypto, SessionUtil }
+import helloscala.common.aes.{Crypto, SessionUtil}
 
 import scala.util.Try
 
@@ -34,12 +34,12 @@ class BasicSessionEncoder[T](implicit serializer: SessionSerializer[T, String]) 
       s"$expiry-$serialized"
     }
 
-    val encrypted = if (config.sessionEncryptData) Crypto.encrypt_AES(withExpiry, config.serverSecret) else withExpiry
+    val encrypted = if (config.sessionEncryptData) Crypto.encryptAES(withExpiry, config.serverSecret) else withExpiry
 
-    s"${Crypto.sign_HmacSHA1_hex(withExpiry, config.serverSecret)}-$encrypted"
+    s"${Crypto.signHmacSHA1Hex(withExpiry, config.serverSecret)}-$encrypted"
   }
 
-  override def decode(s: String, config: SessionConfig) = {
+  override def decode(s: String, config: SessionConfig): Try[DecodeResult[T]] = {
     def extractExpiry(data: String): (Option[Long], String) = {
       config.sessionMaxAgeSeconds.fold((Option.empty[Long], data)) { maxAge =>
         val splitted = data.split("-", 2)
@@ -49,13 +49,13 @@ class BasicSessionEncoder[T](implicit serializer: SessionSerializer[T, String]) 
 
     Try {
       val splitted = s.split("-", 2)
-      val decrypted = if (config.sessionEncryptData) Crypto.decrypt_AES(splitted(1), config.serverSecret) else splitted(1)
+      val decrypted = if (config.sessionEncryptData) Crypto.decryptAES(splitted(1), config.serverSecret) else splitted(1)
 
       val (expiry, serialized) = extractExpiry(decrypted)
 
       val signatureMatches = SessionUtil.constantTimeEquals(
         splitted(0),
-        Crypto.sign_HmacSHA1_hex(decrypted, config.serverSecret))
+        Crypto.signHmacSHA1Hex(decrypted, config.serverSecret))
 
       serializer.deserialize(serialized.substring(1)).map {
         DecodeResult(_, expiry, signatureMatches)

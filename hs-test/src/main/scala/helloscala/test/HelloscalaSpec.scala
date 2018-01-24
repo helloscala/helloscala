@@ -3,14 +3,15 @@ package helloscala.test
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.{ ObjectMapper, SerializationFeature }
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.scalalogging.StrictLogging
+import helloscala.common.jackson.Jackson
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContextExecutor, Future }
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 trait TSpec
   extends MustMatchers
@@ -19,12 +20,9 @@ trait TSpec
   with ScalaFutures {
   this: Suite =>
 
-  val defaultObjectMapper: ObjectMapper =
-    new ObjectMapper()
-      .findAndRegisterModules()
-      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+  val defaultObjectMapper: ObjectMapper = Jackson.defaultObjectMapper
 
-  implicit val defaultPatience = PatienceConfig(Span(90, Seconds), Span(100, Millis))
+  implicit val defaultPatience: PatienceConfig = PatienceConfig(Span(90, Seconds), Span(100, Millis))
 
   def jsonPrettyString[T](f: Future[T]): String = {
     val results = f.futureValue

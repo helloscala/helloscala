@@ -6,7 +6,7 @@ import com.google.inject.AbstractModule
 import helloscala.common.{AppLifecycle, Configuration, HSCommons}
 import helloscala.nosql.cassandra.CassandraSession
 import helloscala.nosql.elasticsearch.ESClient
-import helloscala.util.InternalConfig
+import helloscala.common.util.InternalConfig
 
 @Singleton
 class CassandraSessionProvider @Inject() (

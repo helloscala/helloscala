@@ -2,7 +2,7 @@
  * 正则相关工具函数
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-08.
  */
-package helloscala.util
+package helloscala.common.util
 
 import java.nio.ByteBuffer
 import java.nio.file.{Files, Path}
@@ -11,9 +11,6 @@ import java.time.{LocalDate, LocalDateTime}
 import java.util.Properties
 import java.util.concurrent.ThreadLocalRandom
 
-import org.apache.commons.lang3.StringUtils
-
-import scala.collection.mutable
 import scala.compat.java8.FunctionConverters._
 import scala.util.Try
 import scala.util.matching.Regex

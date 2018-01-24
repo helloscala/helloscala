@@ -2,10 +2,10 @@ package helloscala.http.jackson
 
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.MediaTypes
-import akka.http.scaladsl.unmarshalling.{ FromEntityUnmarshaller, Unmarshaller }
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.util.ByteString
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import helloscala.common.jackson.Jackson
 
 import scala.reflect.ClassTag
@@ -24,9 +24,9 @@ object JacksonSupport extends JacksonSupport {
   }
 
   def readValue[A](content: String)(
-    implicit
-    ct: ClassTag[A],
-    objectMapper: ObjectMapper = Jackson.defaultObjectMapper): A = {
+      implicit
+      ct: ClassTag[A],
+      objectMapper: ObjectMapper = Jackson.defaultObjectMapper): A = {
     objectMapper.readValue(content, ct.runtimeClass).asInstanceOf[A]
   }
 
@@ -55,7 +55,7 @@ trait JacksonSupport {
       .forContentTypes(MediaTypes.`application/json`)
       .mapWithCharset {
         case (ByteString.empty, _) => throw Unmarshaller.NoContentException
-        case (data, charset) => data.decodeString(charset.nioCharset.name)
+        case (data, charset)       => data.decodeString(charset.nioCharset.name)
       }
 
   //  private val jsonStringMarshaller = Marshaller.stringMarshaller(MediaTypes.`application/json`)
@@ -64,9 +64,9 @@ trait JacksonSupport {
    * HTTP entity => `A`
    */
   implicit def unmarshaller[A](
-    implicit
-    ct: ClassTag[A],
-    objectMapper: ObjectMapper = Jackson.defaultObjectMapper): FromEntityUnmarshaller[A] =
+      implicit
+      ct: ClassTag[A],
+      objectMapper: ObjectMapper = Jackson.defaultObjectMapper): FromEntityUnmarshaller[A] =
     jsonStringUnmarshaller.map(
       data => objectMapper.readValue(data, ct.runtimeClass).asInstanceOf[A])
 
@@ -74,8 +74,8 @@ trait JacksonSupport {
    * `A` => HTTP entity
    */
   implicit def marshaller[A](
-    implicit
-    objectMapper: ObjectMapper = Jackson.defaultObjectMapper): ToEntityMarshaller[A] = {
+      implicit
+      objectMapper: ObjectMapper = Jackson.defaultObjectMapper): ToEntityMarshaller[A] = {
     //    jsonStringMarshaller.compose(objectMapper.writeValueAsString)
     JacksonHelper.marshaller[A](objectMapper)
   }

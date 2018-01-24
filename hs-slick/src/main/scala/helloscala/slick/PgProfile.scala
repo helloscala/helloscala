@@ -1,13 +1,17 @@
 package helloscala.slick
 
+import java.sql.Timestamp
+import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.tminglei.slickpg._
 import helloscala.common.data.NameValue
 import helloscala.common.jackson.Jackson
 import helloscala.common.types.ObjectId
+import helloscala.common.util.TimeUtils
 import slick.basic.Capability
-import slick.jdbc.JdbcCapabilities
+import slick.jdbc.{JdbcCapabilities, PositionedParameters, SetParameter}
 
 trait PgProfile
   extends ExPostgresProfile
@@ -29,6 +33,38 @@ trait PgProfile
     with JsonImplicits
     with DateTimeImplicits
     with HStoreImplicits {
+
+    implicit object SetZonedDateTime extends SetParameter[ZonedDateTime] {
+      override def apply(v1: ZonedDateTime, v2: PositionedParameters): Unit = v2.setTimestamp(Timestamp.from(v1.toInstant))
+    }
+
+    implicit object SetOptionZonedDateTime extends SetParameter[Option[ZonedDateTime]] {
+      override def apply(v1: Option[ZonedDateTime], v2: PositionedParameters): Unit = v2.setTimestampOption(v1.map(zdt => Timestamp.from(zdt.toInstant)))
+    }
+
+    implicit object SetLocalDateTime extends SetParameter[LocalDateTime] {
+      override def apply(v1: LocalDateTime, v2: PositionedParameters): Unit = v2.setTimestamp(Timestamp.from(v1.toInstant(TimeUtils.ZONE_CHINA_OFFSET)))
+    }
+
+    implicit object SetOptionLocalDateTime extends SetParameter[Option[LocalDateTime]] {
+      override def apply(v1: Option[LocalDateTime], v2: PositionedParameters): Unit = v2.setTimestampOption(v1.map(ldt => Timestamp.from(ldt.toInstant(TimeUtils.ZONE_CHINA_OFFSET))))
+    }
+
+    implicit object SetLocalDate extends SetParameter[LocalDate] {
+      override def apply(v1: LocalDate, v2: PositionedParameters): Unit = v2.setDate(java.sql.Date.valueOf(v1))
+    }
+
+    implicit object SetOptionLocalDate extends SetParameter[Option[LocalDate]] {
+      override def apply(v1: Option[LocalDate], v2: PositionedParameters): Unit = v2.setDateOption(v1.map(java.sql.Date.valueOf))
+    }
+
+    implicit object SetLocalTime extends SetParameter[LocalTime] {
+      override def apply(v1: LocalTime, v2: PositionedParameters): Unit = v2.setTime(java.sql.Time.valueOf(v1))
+    }
+
+    implicit object SetOptionLocalTime extends SetParameter[Option[LocalTime]] {
+      override def apply(v1: Option[LocalTime], v2: PositionedParameters): Unit = v2.setTimeOption(v1.map(java.sql.Time.valueOf))
+    }
 
     implicit val jsonNodeColumnType: BaseColumnType[JsonNode] = MappedColumnType.base[JsonNode, JsonString](
       { node => JsonString(node.toString) }, { str => Jackson.defaultObjectMapper.readTree(str.value) })
@@ -60,7 +96,7 @@ trait PgProfile
     implicit val objectIdListTypeMapper: DriverJdbcType[List[ObjectId]] = new AdvancedArrayJdbcType[ObjectId](
       "text",
       (s) => utils.SimpleArrayUtils.fromString[ObjectId](str => ObjectId.apply(str))(s).orNull,
-      (v) => utils.SimpleArrayUtils.mkString[ObjectId](id => id.toString)(v)).to(_.toList)
+      (v) => utils.SimpleArrayUtils.mkString[ObjectId](id => id.toString())(v)).to(_.toList)
 
     type FilterCriteriaType = Option[Rep[Option[Boolean]]]
 

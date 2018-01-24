@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind._
 import com.fasterxml.jackson.databind.deser.Deserializers
 import com.fasterxml.jackson.databind.ser.Serializers
-import helloscala.common.jackson.{ AkkaDoneSerialize, ObjectIdDeserializer, ObjectIdSerializer }
+import helloscala.common.jackson.{AkkaDoneSerialize, ObjectIdDeserializer, ObjectIdSerializer}
 import helloscala.common.types.ObjectId
 
 class HelloscalaSerializers extends Serializers.Base {

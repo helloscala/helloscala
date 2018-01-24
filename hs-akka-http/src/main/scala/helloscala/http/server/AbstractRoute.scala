@@ -16,9 +16,11 @@ import helloscala.common.data.ApiResult
 import helloscala.common.exception.{HSBadRequestException, HSException, HSNotFoundException}
 import helloscala.common.page.{Page, PageInput}
 import helloscala.common.types.ObjectId
+import helloscala.common.util.AsInt
 import helloscala.http.{AkkaHttpSourceQueue, HttpUtils}
-import helloscala.util.{AsInt, TimeUtils}
+import helloscala.common.util.TimeUtils
 
+import scala.annotation.tailrec
 import scala.collection.immutable
 import scala.concurrent.Future
 
@@ -123,19 +125,17 @@ trait AbstractRoute extends Directives {
     onSuccess(future).apply(f)
   }
 
-  def objectComplete(obj: AnyRef, needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route =
+  @tailrec
+  final def objectComplete(obj: Any, needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route =
     obj match {
       case Right(result) =>
-        import helloscala.http.jackson.JacksonSupport._
-        val resp = if (needContainer) ApiResult.success(result) else result
-        complete((successCode, resp))
+        objectComplete(result, needContainer, successCode)
 
       case Left(e: HSException) =>
-        complete((StatusCodes.getForKey(e.getErrCode).getOrElse(StatusCodes.InternalServerError), e))
+        objectComplete(e, needContainer, successCode)
 
       case Some(result) =>
-        import helloscala.http.jackson.JacksonSupport._
-        complete((successCode, result))
+        objectComplete(result, needContainer, successCode)
 
       case None =>
         complete(HSNotFoundException("数据不存在"))
@@ -166,10 +166,9 @@ trait AbstractRoute extends Directives {
   def eitherComplete[T](either: Either[HSException, T]): Route = {
     either match {
       case Right(result) =>
-        import helloscala.http.jackson.JacksonSupport._
-        complete(result)
+        objectComplete(result)
       case Left(e) =>
-        complete((StatusCodes.getForKey(e.getErrCode).getOrElse(StatusCodes.InternalServerError), e))
+        objectComplete(e)
     }
   }
 

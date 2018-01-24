@@ -6,7 +6,7 @@ import helloscala.common.auth.ApiTokenInput
 import helloscala.common.types.ObjectId
 import helloscala.http.HttpConstants
 import helloscala.http.core.server.ApiTokenRejection
-import helloscala.util.Implicits._
+import helloscala.common.util.Implicits._
 
 import scala.util.control.NonFatal
 
@@ -52,7 +52,7 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
         onSuccess(tokenOff.storage.lookup(in))
           .flatMap {
             case Right(result) => provide(result)
-            case Left(err) => reject(ApiTokenRejection(err.getMessage, Option(err)))
+            case Left(err)     => reject(ApiTokenRejection(err.getMessage, Option(err)))
           }
       }
 
@@ -67,7 +67,7 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
         onSuccess(tokenOff.storage.authorization(in))
           .flatMap {
             case Right(result) => provide(result)
-            case Left(rjt) => reject(rjt)
+            case Left(rjt)     => reject(rjt)
           }
       }
 
@@ -77,7 +77,7 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
         onSuccess(tokenOff.storage.authorization(in))
           .flatMap {
             case Right(result) => mapRequestContext(rc => new ApiTokenRequestContext(result, rc))
-            case Left(rjt) => reject(rjt)
+            case Left(rjt)     => reject(rjt)
           }
       }
 
@@ -101,7 +101,7 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
         Right(ApiTokenInput(appId.right.get, timestamp.right.get, echoStr.right.get, accessToken.right.get))
       }
     }.flatMap {
-      case Left(msg) => reject(MissingHeaderRejection(msg))
+      case Left(msg)    => reject(MissingHeaderRejection(msg))
       case Right(value) => provide(value)
     }
   }

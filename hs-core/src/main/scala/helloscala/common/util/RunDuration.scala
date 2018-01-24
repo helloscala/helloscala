@@ -1,6 +1,6 @@
-package helloscala.util
+package helloscala.common.util
 
-import java.time.{ Duration, Instant }
+import java.time.{Duration, Instant}
 
 final class RunDuration private () {
   private[this] var _start: Instant = _

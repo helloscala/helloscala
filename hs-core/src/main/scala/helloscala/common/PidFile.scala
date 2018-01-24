@@ -5,7 +5,7 @@ package helloscala.common
 
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Path, StandardOpenOption }
+import java.nio.file.{Files, Path, StandardOpenOption}
 
 object PidFile {
 

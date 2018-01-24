@@ -2,7 +2,7 @@ package helloscala.common.actors
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ActorSystem, Props}
 import helloscala.common.actor.MetricActor
 import helloscala.test.HelloscalaSpec
 import org.scalatest.BeforeAndAfterAll

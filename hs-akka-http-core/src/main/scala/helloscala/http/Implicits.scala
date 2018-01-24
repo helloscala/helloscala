@@ -7,7 +7,7 @@ import helloscala.common.exception.HSException
 import helloscala.common.jackson.Jackson
 import helloscala.common.util.StringUtils
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 object Implicits {

@@ -3,8 +3,8 @@ package helloscala.common.aes
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
+import helloscala.common.util.Utils
 import helloscala.test.HelloscalaSpec
-import helloscala.util.Utils
 
 class CryptoTest extends HelloscalaSpec {
   val SPLIT: String = 0x1.toChar.toString

@@ -1,20 +1,20 @@
 package helloscala.inject
 
-import javax.inject.{ Inject, Provider, Singleton }
+import javax.inject.{Inject, Provider, Singleton}
 import javax.sql.DataSource
 
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.{ActorMaterializer, Materializer}
 import com.google.inject.AbstractModule
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
 import com.zaxxer.hikari.HikariDataSource
-import helloscala.common.{ AppLifecycle, Configuration }
+import helloscala.common.{AppLifecycle, Configuration}
 import helloscala.inject.component.DefaultAppLifecycle
-import helloscala.jdbc.{ JdbcOperations, JdbcTemplate, JdbcUtils }
-import helloscala.util.InternalConfig
+import helloscala.jdbc.{JdbcOperations, JdbcTemplate, JdbcUtils}
+import helloscala.common.util.InternalConfig
 
-import scala.concurrent.{ ExecutionContext, ExecutionContextExecutor, Future }
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 //@Singleton
 //class ConfigProvider extends Provider[Config] {
@@ -33,8 +33,8 @@ class ConfigurationProvider @Inject() (config: Config) extends Provider[Configur
 
 @Singleton
 class ActorSystemProvider @Inject() (
-  configuration: Configuration,
-  appLifecycle: AppLifecycle) extends Provider[ActorSystem] {
+    configuration: Configuration,
+    appLifecycle: AppLifecycle) extends Provider[ActorSystem] {
 
   private[this] val system = ActorSystem(
     configuration.get[Option[String]]("helloscala.akka-system-name").getOrElse("hs"),

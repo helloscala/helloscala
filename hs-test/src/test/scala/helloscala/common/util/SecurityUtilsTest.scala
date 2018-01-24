@@ -1,4 +1,4 @@
-package helloscala.util
+package helloscala.common.util
 
 import java.security.MessageDigest
 
@@ -13,8 +13,8 @@ class SecurityUtilsTest extends HelloscalaSpec {
   "SecurityUtilsTest" should {
 
     "sha1Hex" in {
-      val v1 = SecurityUtils.sha1Hex("yangbajing")
-      val v2 = SecurityUtils.sha1Hex("yangjing")
+      val v1 = DigestUtils.sha1Hex("yangbajing")
+      val v2 = DigestUtils.sha1Hex("yangjing")
       v1 must not be v2
     }
 
@@ -33,7 +33,7 @@ class SecurityUtilsTest extends HelloscalaSpec {
   }
 
   "sha256hex length" in {
-    val len = SecurityUtils.sha256Hex("哈哈哈哈哈哈")
+    val len = DigestUtils.sha256Hex("哈哈哈哈哈哈")
     println(len)
     println(len.length)
   }

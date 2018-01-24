@@ -1,4 +1,4 @@
-package helloscala.util
+package helloscala.common.util
 
 import helloscala.common.types.ObjectId
 import helloscala.test.HelloscalaSpec

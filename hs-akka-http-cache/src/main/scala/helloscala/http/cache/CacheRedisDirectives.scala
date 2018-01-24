@@ -1,23 +1,22 @@
 package helloscala.http.cache
 
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{ HttpResponse, ResponseEntity }
+import akka.http.scaladsl.model.{HttpResponse, ResponseEntity}
 import akka.http.scaladsl.server.Directive0
 import akka.http.scaladsl.server.Directives._
 import com.redis.RedisClientPool
 import com.typesafe.scalalogging.StrictLogging
 import helloscala.common.jackson.Jackson
-import helloscala.common.util.StringUtils
+import helloscala.common.util.{DigestUtils, SecurityUtils, StringUtils}
 import helloscala.http.jackson.JacksonSupport
-import helloscala.util.SecurityUtils
 
 import scala.concurrent.duration._
 
 trait CacheRedisDirectives {
   def cacheRedisOnParameters(
-    redisClientPool: RedisClientPool,
-    expiry: FiniteDuration,
-    isEncodeCacheKey: Boolean = true): Directive0 =
+      redisClientPool: RedisClientPool,
+      expiry: FiniteDuration,
+      isEncodeCacheKey: Boolean = true): Directive0 =
     CacheRedisDirectives.cacheRedisOnParameters(redisClientPool, expiry)
 }
 
@@ -52,15 +51,15 @@ object CacheRedisDirectives extends StrictLogging {
    * @return
    */
   def cacheRedisOnParameters(
-    redisClientPool: RedisClientPool,
-    expiry: FiniteDuration,
-    isEncodeCacheKey: Boolean = true): Directive0 = {
+      redisClientPool: RedisClientPool,
+      expiry: FiniteDuration,
+      isEncodeCacheKey: Boolean = true): Directive0 = {
     extract { ctx =>
       val query = ctx.request.uri.query()
       val keys = query.map(_._1).sorted
       val tmpKey = ctx.request.uri.path.toString() + ':' + keys.flatMap(key => query.get(key)).mkString
       val cacheKey = if (isEncodeCacheKey) {
-        val k = SecurityUtils.sha1Hex(tmpKey)
+        val k = DigestUtils.sha1Hex(tmpKey)
         logger.trace(s"uri: ${ctx.request.uri}, originCacheKey: $tmpKey, encodeCacheKey: $k")
         k
       } else {
@@ -89,7 +88,7 @@ object CacheRedisDirectives extends StrictLogging {
       case (Some(cachedKey), _) => // 将响应值设置到缓存
         extractRequestContext
           .flatMap { ctx =>
-            import ctx.{ executionContext, materializer }
+            import ctx.{executionContext, materializer}
             mapResponse { response =>
               response.entity.toStrict(10.seconds).onComplete {
                 case scala.util.Success(responseEntity) =>

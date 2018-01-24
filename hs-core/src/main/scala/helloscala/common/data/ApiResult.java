@@ -1,5 +1,9 @@
 package helloscala.common.data;
 
+import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Objects;
+
 /**
  * Api Response Result
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-01.
@@ -7,6 +11,8 @@ package helloscala.common.data;
 public class ApiResult implements IApiResult<Object> {
     private Integer errCode = 0;
     private String errMsg = null;
+
+    @ApiModelProperty(dataType = "object")
     private Object data = null;
 
     public ApiResult() {
@@ -45,6 +51,26 @@ public class ApiResult implements IApiResult<Object> {
 
     public Object getData() {
         return data;
+    }
+
+    public ApiResult setData(Object data) {
+        this.data = data;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ApiResult)) return false;
+        ApiResult apiResult = (ApiResult) o;
+        return Objects.equals(getErrCode(), apiResult.getErrCode()) &&
+                Objects.equals(getErrMsg(), apiResult.getErrMsg()) &&
+                Objects.equals(getData(), apiResult.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getErrCode(), getErrMsg(), getData());
     }
 
     @Override

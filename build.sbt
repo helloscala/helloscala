@@ -117,7 +117,7 @@ lazy val hsJdbc = coreProject("hs-jdbc")
   .dependsOn(hsTest % "compile->test;test->test", hsCore)
   .settings(
     libraryDependencies ++= Seq(
-      _hikariCP % Provided,
+      _hikariCP,
       _postgresql % Provided,
       _mysql % Provided
     )
@@ -142,6 +142,7 @@ lazy val hsCore = coreProject("hs-core")
   .settings(
     libraryDependencies ++= Seq(
       _swaggerAnnotation % Provided,
+      _hikariCP % Provided,
       _commonsLang3,
       _bouncycastleProvider,
       _log4jToSlf4j,

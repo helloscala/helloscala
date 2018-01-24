@@ -1,14 +1,14 @@
 package helloscala.jdbc
 
 import java.sql._
-import java.time.{ LocalDate, LocalDateTime, LocalTime, ZonedDateTime }
-import java.util.{ Properties, HashMap => JHashMap, Map => JMap }
+import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
+import java.util.{Properties, HashMap => JHashMap, Map => JMap}
 
 import com.typesafe.scalalogging.StrictLogging
-import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import helloscala.common.HSCommons
-import helloscala.common.util.{ ClassUtils, NumberUtils, StringUtils }
-import helloscala.util.TimeUtils
+import helloscala.common.util.{ClassUtils, NumberUtils, StringUtils}
+import helloscala.common.util.TimeUtils
 
 import scala.collection.mutable
 import scala.compat.java8.FunctionConverters._
@@ -81,8 +81,8 @@ object JdbcUtils extends StrictLogging {
   def generateWhere(wheres: Seq[AnyRef], step: String = AND): String = {
     val list = wheres.flatMap {
       case Some(partial) => Some(partial)
-      case None => None
-      case partial => Some(partial)
+      case None          => None
+      case partial       => Some(partial)
     }
     if (list.isEmpty) "" else list.mkString(" WHERE ", s" $step ", " ")
   }
@@ -212,10 +212,10 @@ object JdbcUtils extends StrictLogging {
   def setParameter(pstmt: PreparedStatement, i: Int, arg: Any): Unit = {
     val obj = arg match {
       case ldt: LocalDateTime => TimeUtils.toSqlTimestamp(ldt)
-      case ld: LocalDate => TimeUtils.toSqlDate(ld)
-      case t: LocalTime => TimeUtils.toSqlTime(t)
+      case ld: LocalDate      => TimeUtils.toSqlDate(ld)
+      case t: LocalTime       => TimeUtils.toSqlTime(t)
       case zdt: ZonedDateTime => TimeUtils.toSqlTimestamp(zdt)
-      case _ => arg
+      case _                  => arg
     }
     pstmt.setObject(i, obj)
   }
@@ -249,10 +249,10 @@ object JdbcUtils extends StrictLogging {
       try con.close()
       catch {
         case ex: SQLException =>
-          logger.debug("Could not close JDBC Connection", ex)
+          logger.error("Could not close JDBC Connection", ex)
         case ex: Throwable =>
           // We don't trust the JDBC driver: It might throw RuntimeException or Error.
-          logger.debug("Unexpected exception on closing JDBC Connection", ex)
+          logger.error("Unexpected exception on closing JDBC Connection", ex)
       }
     }
 
@@ -279,7 +279,7 @@ object JdbcUtils extends StrictLogging {
       rs.getObject(index) match {
         case s: String => s
         case n: Number => NumberUtils.convertNumberToTargetClass(n, classOf[Integer])
-        case _ => rs.getString(index)
+        case _         => rs.getString(index)
       }
     } else {
       var value: Any = null

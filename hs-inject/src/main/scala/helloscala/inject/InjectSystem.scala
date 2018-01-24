@@ -2,9 +2,9 @@ package helloscala.inject
 
 import javax.inject.Named
 
-import com.google.inject.{ Guice, Injector, Key, Module }
+import com.google.inject.{Guice, Injector, Key, Module}
 import helloscala.common.util.StringUtils
-import helloscala.util.InternalConfig
+import helloscala.common.util.InternalConfig
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag

@@ -14,6 +14,8 @@ public interface IApiResult<T> {
 
     @JsonIgnore
     default boolean isSuccess() {
-        return getErrCode() == 0;
+        Integer errCode = getErrCode();
+        return errCode == null || errCode == 0;
     }
+
 }

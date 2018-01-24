@@ -17,10 +17,10 @@
 package helloscala.common.util;
 
 /**
- * <p>Operations on {@link CharSequence} that are
+ * <p>Operations on {@link java.lang.CharSequence} that are
  * {@code null} safe.</p>
  *
- * @see CharSequence
+ * @see java.lang.CharSequence
  * @since 3.0
  */
 public class CharSequenceUtils {

@@ -1,11 +1,11 @@
 package helloscala.http
 
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import com.github.swagger.akka.SwaggerHttpService
-import com.github.swagger.akka.model.{ Contact, Info, License }
+import com.github.swagger.akka.model.{Contact, Info, License}
 import helloscala.common.Configuration
-import helloscala.util.ReflectUtils
+import helloscala.common.util.ReflectUtils
 
 /**
  * Swagger Route，配置使用Swagger自动生成文档。只包含swagger.json或swagger.yaml配置文件（/api-docs/swagger.json）
@@ -14,9 +14,9 @@ import helloscala.util.ReflectUtils
  * Created by yangbajing(yangbajing@gmail.com) on 2017-04-10.
  */
 class SwaggerHttpDoc private (
-  configuration: Configuration,
-  _apiTypes: Traversable[Class[_]],
-  basePath: String) extends SwaggerHttpService {
+    configuration: Configuration,
+    _apiTypes: Traversable[Class[_]],
+    basePath: String) extends SwaggerHttpService {
 
   require(configuration.underlying.hasPath(s"$basePath.scan-packages"), s"config配置路径：[$basePath.scan-packages] 不存在")
 
@@ -88,9 +88,9 @@ class SwaggerHttpDoc private (
 object SwaggerHttpDoc {
 
   def apply(
-    configuration: Configuration,
-    apiTypes: Traversable[Class[_]] = Traversable(),
-    basePath: String = "akka.http.swagger") =
+      configuration: Configuration,
+      apiTypes: Traversable[Class[_]] = Traversable(),
+      basePath: String = "akka.http.swagger") =
     new SwaggerHttpDoc(configuration, apiTypes, basePath)
 
 }

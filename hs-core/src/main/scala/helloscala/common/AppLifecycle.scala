@@ -1,6 +1,6 @@
 package helloscala.common
 
-import java.util.concurrent.{ Callable, CompletionStage }
+import java.util.concurrent.{Callable, CompletionStage}
 
 import scala.compat.java8.FutureConverters
 import scala.concurrent.Future

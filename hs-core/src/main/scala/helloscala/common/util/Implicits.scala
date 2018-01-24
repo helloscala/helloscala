@@ -1,6 +1,6 @@
-package helloscala.util
+package helloscala.common.util
 
-import helloscala.util.Implicits.Option2Either
+import helloscala.common.util.Implicits.Option2Either
 
 import scala.language.implicitConversions
 
@@ -21,7 +21,7 @@ object Implicits {
     def toEither[L](left: => L): Either[L, R] = {
       maybe match {
         case Some(value) => Right(value)
-        case None => Left(left)
+        case None        => Left(left)
       }
     }
   }

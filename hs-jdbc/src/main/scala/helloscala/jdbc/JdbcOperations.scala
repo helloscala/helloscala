@@ -1,9 +1,9 @@
 package helloscala.jdbc
 
-import java.sql.{ Connection, ResultSet, SQLException }
+import java.sql.{Connection, ResultSet, SQLException}
 import java.util
+import java.util.Collections
 import javax.sql.DataSource
-import javax.swing.tree.RowMapper
 
 import scala.annotation.varargs
 
@@ -109,12 +109,19 @@ trait JdbcOperations {
    */
   def namedSize(sql: String, args: Map[String, Any])(implicit connection: Connection = JdbcTemplate.EmptyConnection): Long
 
+  def queryForList(sql: String): util.List[util.Map[String, Object]] = queryForList(sql, Collections.emptyList())
+
   /**
    * 获取记录列表 Java API
    * @param sql SQL语句
    * @return
    */
-  def queryForList(sql: String): util.List[util.Map[String, Object]]
+  def queryForList(sql: String, args: util.Collection[Object]): util.List[util.Map[String, Object]]
+
+  def queryObjectForList[R](sql: String, rowMapper: java.util.function.Function[ResultSet, R]): util.List[R] =
+    queryObjectForList(sql, Collections.emptyList(), rowMapper)
+
+  def queryObjectForList[R](sql: String, args: util.Collection[Object], rowMapper: java.util.function.Function[ResultSet, R]): util.List[R]
 
   def listForMap(sql: String, args: Seq[Any])(implicit connection: Connection = JdbcTemplate.EmptyConnection): List[Map[String, Object]]
 
@@ -145,9 +152,9 @@ trait JdbcOperations {
    */
   @throws[SQLException]
   def execute[R](
-    externalConn: Connection,
-    pscFunc: ConnectionPreparedStatementCreator,
-    actionFunc: PreparedStatementAction[R],
-    useTransaction: Boolean): R
+      externalConn: Connection,
+      pscFunc: ConnectionPreparedStatementCreator,
+      actionFunc: PreparedStatementAction[R],
+      useTransaction: Boolean): R
 
 }

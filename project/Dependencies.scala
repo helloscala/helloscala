@@ -7,7 +7,7 @@ object Dependencies {
 
   val _scalatest = "org.scalatest" %% "scalatest" % "3.0.4"
 
-  private val versionAkka = "2.5.8"
+  private val versionAkka = "2.5.9"
   lazy val _akka = Seq(
     "com.typesafe.akka" %% "akka-actor" % versionAkka,
     "com.typesafe.akka" %% "akka-slf4j" % versionAkka,
@@ -21,7 +21,7 @@ object Dependencies {
 
   val _akkaStreamKafka = "com.typesafe.akka" %% "akka-stream-kafka" % "0.17"
 
-  private val versionAlpakka = "0.15"
+  private val versionAlpakka = "0.17"
   val _alpakkaCassandra = ("com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"), ExclusionRule("com.datastax.cassandra"), ExclusionRule("io.netty"), ExclusionRule("com.google.guava"))
 
@@ -90,7 +90,7 @@ object Dependencies {
     "com.typesafe.slick" %% "slick-hikaricp" % versionSlick
   )
 
-  private val versionSlickPg = "0.15.4"
+  private val versionSlickPg = "0.15.5"
   val _slickPg = Seq(
     "com.github.tminglei" %% "slick-pg" % versionSlickPg
   )
@@ -128,7 +128,7 @@ object Dependencies {
   val _guice = ("com.google.inject" % "guice" % versionGuice).exclude("com.google.guava", "guava")
   val _guiceAssistedinject = "com.google.inject.extensions" % "guice-assistedinject" % versionGuice
 
-  private val versionNetty = "4.1.19.Final"
+  private val versionNetty = "4.1.20.Final"
   val _nettyNativeEpoll = "io.netty" % "netty-transport-native-epoll" % versionNetty classifier "linux-x86_64"
   //  val _nettyAll = "io.netty" % "netty-all" % versionNetty
   val _nettyHandler = "io.netty" % "netty-handler" % versionNetty
@@ -150,7 +150,7 @@ object Dependencies {
 
   val _commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.7"
 
-  val _bouncycastleProvider = "org.bouncycastle" % "bcprov-jdk15on" % "1.58"
+  val _bouncycastleProvider = "org.bouncycastle" % "bcprov-jdk15on" % "1.59"
 
   private val versionPoi = "3.17"
   val _poi = Seq(
@@ -159,12 +159,11 @@ object Dependencies {
     "org.apache.poi" % "poi-ooxml" % versionPoi
   )
 
-  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.4"
+  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.6"
 
   val _postgresql = "org.postgresql" % "postgresql" % "42.1.4"
-  val _mysql = "mysql" % "mysql-connector-java" % "6.0.6"
 
-  val _jama = "gov.nist.math" % "jama" % "1.0.3"
+  val _mysql = "mysql" % "mysql-connector-java" % "6.0.6"
 
   private val versionTika = "1.17"
   val _tika = Seq(

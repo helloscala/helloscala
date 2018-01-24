@@ -11,8 +11,7 @@ object Commons {
   //    crossScalaVersions := Seq(versionScala, versionScala212)
   //  )
 
-  def basicSettings = Seq(
-    version := Version.version,
+  def basicSettings = Version.versionning ++ Seq(
     organization := "com.hualongdata",
     organizationName := "hualongdata.com",
     organizationHomepage := Some(url("https://hualongdata.com")),

@@ -1,13 +1,13 @@
 package helloscala.inject.component.http
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import helloscala.common.exception.HSException
-import helloscala.common.{ Configuration, ErrCodes }
+import helloscala.common.{Configuration, ErrCodes}
 import helloscala.http.HttpConstants
 import helloscala.inject.component.DefaultAppLifecycle
 
@@ -16,17 +16,21 @@ import scala.concurrent.duration._
 
 @Singleton
 class CommonRoutes @Inject() (
-  appLifecycle: DefaultAppLifecycle,
-  actorSystem: ActorSystem,
-  configuration: Configuration) {
+    appLifecycle: DefaultAppLifecycle,
+    actorSystem: ActorSystem,
+    configuration: Configuration) {
 
   def htmlRoute: Route = {
-    configuration.get[Option[String]](s"${HttpConstants.CONFIG_PATH_PREFIX}.html-resource-path") match {
-      case Some(path) =>
-        getFromResourceDirectory(path) ~ getFromResource(s"$path/index.html")
-      case _ =>
-        val path = configuration.getString(s"${HttpConstants.CONFIG_PATH_PREFIX}.html-path")
-        getFromDirectory(path) ~ getFromFile(s"$path/index.html")
+    if (configuration.has(HttpConstants.CONFIG_PATH_PREFIX)) {
+      configuration.get[Option[String]](s"${HttpConstants.CONFIG_PATH_PREFIX}.html-resource-path") match {
+        case Some(path) =>
+          getFromResourceDirectory(path) ~ getFromResource(s"$path/index.html")
+        case _ =>
+          val path = configuration.getString(s"${HttpConstants.CONFIG_PATH_PREFIX}.html-path")
+          getFromDirectory(path) ~ getFromFile(s"$path/index.html")
+      }
+    } else {
+      reject
     }
   }
 

@@ -1,10 +1,10 @@
-package helloscala.util
+package helloscala.common.util
 
-import java.nio.file.StandardOpenOption.{ CREATE, TRUNCATE_EXISTING, WRITE }
-import java.nio.file.{ OpenOption, Path }
+import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING, WRITE}
+import java.nio.file.{OpenOption, Path}
 
 import akka.stream.IOResult
-import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink }
+import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
 import akka.util.ByteString
 
 import scala.concurrent.Future
@@ -19,9 +19,9 @@ object FileUtils {
    * @return
    */
   def lineSink(
-    filename: Path,
-    options: Set[OpenOption] = Set(WRITE, TRUNCATE_EXISTING, CREATE),
-    lineSeparator: String = "\n"): Sink[String, Future[IOResult]] =
+      filename: Path,
+      options: Set[OpenOption] = Set(WRITE, TRUNCATE_EXISTING, CREATE),
+      lineSeparator: String = "\n"): Sink[String, Future[IOResult]] =
     Flow[String]
       .map(s => ByteString(s + lineSeparator))
       .toMat(FileIO.toPath(filename, options))(Keep.right)

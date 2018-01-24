@@ -2,7 +2,7 @@ package helloscala.nosql.elasticsearch
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.sksamuel.elastic4s.{ Hit, HitReader, Indexable }
+import com.sksamuel.elastic4s.{Hit, HitReader, Indexable}
 import com.typesafe.scalalogging.StrictLogging
 import helloscala.common.jackson.Jackson
 
@@ -16,16 +16,16 @@ object ElasticJackson {
   object Implicits extends StrictLogging {
 
     implicit def JacksonJsonIndexable[T](
-      implicit
-      mapper: ObjectMapper = Jackson.defaultObjectMapper): Indexable[T] =
+        implicit
+        mapper: ObjectMapper = Jackson.defaultObjectMapper): Indexable[T] =
       new Indexable[T] {
         override def json(t: T) = mapper.writeValueAsString(t)
       }
 
     implicit def JacksonJsonHitReader[T](
-      implicit
-      mapper: ObjectMapper = Jackson.defaultObjectMapper,
-      manifest: Manifest[T]): HitReader[T] =
+        implicit
+        mapper: ObjectMapper = Jackson.defaultObjectMapper,
+        manifest: Manifest[T]): HitReader[T] =
       new HitReader[T] {
         def read(hit: Hit): Either[Throwable, T] = {
           require(hit.sourceAsString != null)

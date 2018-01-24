@@ -1,14 +1,13 @@
 package com.github.swagger.akka.samples
 
-import io.swagger.annotations._
 import javax.ws.rs.Path
-import akka.http.scaladsl.server.Directives
-import akka.http.scaladsl.unmarshalling._
-import akka.stream.ActorMaterializer
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.ToResponseMarshallable.apply
-import akka.http.scaladsl.server.Directive.addByNameNullaryApply
-import akka.http.scaladsl.server.Directive.addDirectiveApply
+import akka.http.scaladsl.server.Directive.{addByNameNullaryApply, addDirectiveApply}
+import akka.http.scaladsl.server.Directives
+import akka.stream.ActorMaterializer
+import io.swagger.annotations._
 
 @Api(value = "/dict", description = "This is a dictionary api.")
 @Path("/dict")

@@ -1,25 +1,29 @@
 package helloscala.http
 
-import java.nio.charset.{ Charset, UnsupportedCharsetException }
+import java.nio.charset.{Charset, UnsupportedCharsetException}
 import java.time.Instant
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.scaladsl.{ Keep, Sink, Source }
-import akka.stream.{ ActorMaterializer, Materializer, OverflowStrategy, QueueOfferResult }
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
+import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.{ActorMaterializer, Materializer, OverflowStrategy, QueueOfferResult}
 import akka.util.ByteString
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.typesafe.scalalogging.StrictLogging
+import helloscala.common.exception.HSException
 import helloscala.common.jackson.Jackson
 import helloscala.common.page.PageInput
-import helloscala.common.util.StringUtils
-import helloscala.util.{ SecurityUtils, Utils }
+import helloscala.common.util.{DigestUtils, SecurityUtils, StringUtils, Utils}
+import helloscala.http.jackson.JacksonSupport
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext, Future, Promise }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
+import scala.reflect.ClassTag
+import scala.util.{Failure, Success}
 
 class AkkaHttpSourceQueue(val httpSourceQueue: HttpSourceQueue)
 
@@ -36,6 +40,59 @@ object HttpUtils extends StrictLogging {
     val future = Unmarshal(response.entity).to[String]
     val value = Await.result(future, 10.seconds)
     println(s"[$response]\n\t\t$value\n")
+  }
+
+  @inline
+  def haveSuccess(status: StatusCode): Boolean = haveSuccess(status.intValue())
+
+  @inline
+  def haveSuccess(status: Int): Boolean = status >= 200 && status < 300
+
+  def mapHttpResponse[R: ClassTag](
+      response: HttpResponse
+  )(
+      implicit
+      mat: Materializer, um: FromEntityUnmarshaller[R] = JacksonSupport.unmarshaller, ec: ExecutionContext = null
+  ): Future[Either[HSException, R]] =
+    if (HttpUtils.haveSuccess(response.status)) {
+      Unmarshal(response.entity).to[R].map(v => Right(v))(if (ec eq null) mat.executionContext else ec)
+    } else {
+      mapHttpResponseError[R](response)
+    }
+
+  def mapHttpResponseList[R](
+      response: HttpResponse
+  )(
+      implicit
+      ev1: ClassTag[R], mat: Materializer, ec: ExecutionContext = null
+  ): Future[Either[HSException, List[R]]] = {
+    if (HttpUtils.haveSuccess(response.status)) {
+      Unmarshal(response.entity)
+        .to[ArrayNode](JacksonSupport.unmarshaller, ec, mat)
+        .map { array =>
+          val list = array.asScala
+            .map(node => Jackson.defaultObjectMapper.treeToValue(node, ev1.runtimeClass).asInstanceOf[R])
+            .toList
+          Right(list)
+        }(if (ec eq null) mat.executionContext else ec)
+    } else {
+      mapHttpResponseError[List[R]](response)
+    }
+  }
+
+  def mapHttpResponseError[R](
+      response: HttpResponse
+  )(
+      implicit
+      mat: Materializer, ec: ExecutionContext = null
+  ): Future[Either[HSException, R]] = {
+    if (response.entity.contentType.mediaType == MediaTypes.`application/json`) {
+      Unmarshal(response.entity).to[HSException](JacksonSupport.unmarshaller, ec, mat)
+        .map(e => Left(e))(if (ec eq null) mat.executionContext else ec)
+    } else {
+      Unmarshal(response.entity).to[String]
+        .map(errMsg => Left(new HSException(response.status.intValue(), errMsg)))(if (ec eq null) mat.executionContext else ec)
+    }
   }
 
   def queryToPageParams(query: Uri.Query): PageInput = {
@@ -97,8 +154,8 @@ object HttpUtils extends StrictLogging {
 
     val tupleKey = contentType.split('/') match {
       case Array(k, v) => (k.toLowerCase(), v.toLowerCase())
-      case Array(k) => (k.toLowerCase(), "")
-      case _ => ("", "")
+      case Array(k)    => (k.toLowerCase(), "")
+      case _           => ("", "")
     }
     logger.debug(s"tupleKey: $tupleKey")
 
@@ -119,9 +176,9 @@ object HttpUtils extends StrictLogging {
       case woc: MediaType.WithOpenCharset =>
         val httpCharset = HttpCharsets.getForKeyCaseInsensitive(charset).getOrElse(HttpCharsets.`UTF-8`)
         woc.withCharset(httpCharset)
-      case mt: MediaType.Binary => ContentType(mt)
+      case mt: MediaType.Binary           => ContentType(mt)
       case mt: MediaType.WithFixedCharset => ContentType(mt)
-      case _ => null
+      case _                              => null
     }
     Option(httpContentType)
   }
@@ -133,9 +190,9 @@ object HttpUtils extends StrictLogging {
   def cachedHostConnectionPool(url: String)(implicit mat: ActorMaterializer): HttpSourceQueue = {
     val uri = Uri(url)
     uri.scheme match {
-      case "http" => cachedHostConnectionPool(uri.authority.host.address(), uri.authority.port)
+      case "http"  => cachedHostConnectionPool(uri.authority.host.address(), uri.authority.port)
       case "https" => cachedHostConnectionPoolHttps(uri.authority.host.address(), uri.authority.port)
-      case _ => throw new IllegalArgumentException(s"URL: $url 不是有效的 http 或 https 协议")
+      case _       => throw new IllegalArgumentException(s"URL: $url 不是有效的 http 或 https 协议")
     }
   }
 
@@ -154,7 +211,7 @@ object HttpUtils extends StrictLogging {
       .via(poolClientFlow)
       .toMat(Sink.foreach({
         case ((Success(resp), p)) => p.success(resp)
-        case ((Failure(e), p)) => p.failure(e)
+        case ((Failure(e), p))    => p.failure(e)
       }))(Keep.left)
       .run()
   }
@@ -174,7 +231,7 @@ object HttpUtils extends StrictLogging {
       .via(poolClientFlow)
       .toMat(Sink.foreach({
         case ((Success(resp), p)) => p.success(resp)
-        case ((Failure(e), p)) => p.failure(e)
+        case ((Failure(e), p))    => p.failure(e)
       }))(Keep.left)
       .run()
   }
@@ -189,13 +246,13 @@ object HttpUtils extends StrictLogging {
    * @return
    */
   def applyApiToken(
-    request: HttpRequest,
-    appId: String,
-    appKey: String,
-    echoStr: String = Utils.randomString(12)): HttpRequest = {
+      request: HttpRequest,
+      appId: String,
+      appKey: String,
+      echoStr: String = Utils.randomString(12)): HttpRequest = {
     val timestamp = Instant.now().getEpochSecond.toString
     val echoStr = Utils.randomString(8)
-    val accessToken = SecurityUtils.sha256Hex(appId + appKey + echoStr + timestamp)
+    val accessToken = DigestUtils.sha256Hex(appId + appKey + echoStr + timestamp)
     val headers = List(
       RawHeader(HttpConstants.HS_APP_ID, appId),
       RawHeader(HttpConstants.HS_TIMESTAMP, timestamp),
@@ -215,20 +272,20 @@ object HttpUtils extends StrictLogging {
    * @return HttpResponse
    */
   def singleRequest(
-    method: HttpMethod,
-    uri: Uri,
-    params: Seq[(String, String)] = Nil,
-    data: AnyRef = null,
-    headers: immutable.Seq[HttpHeader] = Nil,
-    protocol: HttpProtocol = HttpProtocols.`HTTP/1.1`)(implicit mat: ActorMaterializer): Future[HttpResponse] = {
+      method: HttpMethod,
+      uri: Uri,
+      params: Seq[(String, String)] = Nil,
+      data: AnyRef = null,
+      headers: immutable.Seq[HttpHeader] = Nil,
+      protocol: HttpProtocol = HttpProtocols.`HTTP/1.1`)(implicit mat: ActorMaterializer): Future[HttpResponse] = {
     val request = HttpRequest(
       method,
       uri.withQuery(Uri.Query(params: _*)),
       headers,
       entity = data match {
-        case null => HttpEntity.Empty
+        case null                    => HttpEntity.Empty
         case entity: UniversalEntity => entity
-        case _ => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _                       => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       },
       protocol = protocol)
     singleRequest(request)
@@ -255,23 +312,23 @@ object HttpUtils extends StrictLogging {
   def hostRequest(request: HttpRequest)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
     val responsePromise = Promise[HttpResponse]()
     httpSourceQueue.offer(request -> responsePromise).flatMap {
-      case QueueOfferResult.Enqueued => responsePromise.future
-      case QueueOfferResult.Dropped => Future.failed(new RuntimeException("Queue overflowed. Try again later."))
+      case QueueOfferResult.Enqueued    => responsePromise.future
+      case QueueOfferResult.Dropped     => Future.failed(new RuntimeException("Queue overflowed. Try again later."))
       case QueueOfferResult.Failure(ex) => Future.failed(ex)
       case QueueOfferResult.QueueClosed => Future.failed(new RuntimeException("Queue was closed (pool shut down) while running the request. Try again later."))
     }
   }
 
   def hostRequest(
-    method: HttpMethod,
-    uri: Uri,
-    params: Seq[(String, String)] = Nil,
-    data: AnyRef = null,
-    headers: immutable.Seq[HttpHeader] = Nil)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
+      method: HttpMethod,
+      uri: Uri,
+      params: Seq[(String, String)] = Nil,
+      data: AnyRef = null,
+      headers: immutable.Seq[HttpHeader] = Nil)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
     val entity = if (data != null) {
       data match {
         case entity: MessageEntity => entity
-        case _ => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _                     => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       }
     } else {
       HttpEntity.Empty
@@ -280,15 +337,15 @@ object HttpUtils extends StrictLogging {
   }
 
   def makeRequest(
-    method: HttpMethod,
-    uri: Uri,
-    params: Seq[(String, Any)] = Nil,
-    data: AnyRef = null,
-    headers: immutable.Seq[HttpHeader] = Nil): HttpRequest = {
+      method: HttpMethod,
+      uri: Uri,
+      params: Seq[(String, Any)] = Nil,
+      data: AnyRef = null,
+      headers: immutable.Seq[HttpHeader] = Nil): HttpRequest = {
     val entity = if (data != null) {
       data match {
         case entity: MessageEntity => entity
-        case _ => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _                     => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       }
     } else {
       HttpEntity.Empty
