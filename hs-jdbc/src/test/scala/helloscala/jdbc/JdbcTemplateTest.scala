@@ -2,7 +2,7 @@ package helloscala.jdbc
 
 import java.util.Properties
 
-import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import helloscala.test.HelloscalaSpec
 import org.scalatest.BeforeAndAfterAll
 
@@ -11,12 +11,12 @@ class JdbcTemplateTest extends HelloscalaSpec with BeforeAndAfterAll {
   val dataSource = {
     val props = new Properties()
     props.put("dataSourceClassName", "org.postgresql.ds.PGSimpleDataSource")
-    props.put("dataSource.serverName", "127.0.0.1")
+    props.put("dataSource.serverName", "dn126")
     props.put("dataSource.portNumber", "5432")
-    props.put("dataSource.databaseName", "hldev")
-    props.put("dataSource.user", "hldev")
-    props.put("dataSource.password", "hldev")
-    new HikariDataSource(new HikariConfig())
+    props.put("dataSource.databaseName", "recommend_system")
+    props.put("dataSource.user", "devops")
+    props.put("dataSource.password", "hl.Data2017")
+    new HikariDataSource(new HikariConfig(props))
   }
 
   val jdbcTemplate = new JdbcTemplate(dataSource, true, true, true)
@@ -51,15 +51,11 @@ class JdbcTemplateTest extends HelloscalaSpec with BeforeAndAfterAll {
       println(results)
     }
 
-    "select from test_table list" in {
-      val sql = "SELECT * FROM test_table LIMIT 10"
-      val list = jdbcTemplate.listForObject(
-        sql,
-        Nil,
-        rs => TestTable(rs.getLong("id"), rs.getString("name"), rs.getInt("age")))
+    "select from resource list" in {
+      val sql = "SELECT * FROM rs.resource LIMIT 10"
+      val list = jdbcTemplate.listForMap(sql, Nil).map(data => JdbcUtils.convertUnderscoreNameToPropertyName(data))
       list.foreach(println)
-      list.size must be > 0
-      list.size must be < 10
+      list must not be empty
     }
 
     "insert by Map" in {

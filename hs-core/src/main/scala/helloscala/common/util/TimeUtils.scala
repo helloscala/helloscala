@@ -12,6 +12,7 @@ import java.util.Date
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.util.Try
+import scala.util.control.NonFatal
 
 object TimeUtils extends StrictLogging {
 
@@ -184,12 +185,12 @@ object TimeUtils extends StrictLogging {
       case Array(dOrT) =>
         if (containsDateKeys(dOrT)) toZonedDateTime(dOrT, "") else toZonedDateTime("", dOrT)
       case _ =>
-        throw new DateTimeException(s"$zdt 是无效的日期时间格式，推荐格式：yyyy-MM-dd HH:mm:ss[+Z]")
+        ZonedDateTime.parse(zdt)
     }
   } catch {
-    case e: Exception =>
+    case NonFatal(ex) =>
       logger.warn(s"toZonedDateTime error: $zdt")
-      throw e
+      throw ex
   }
 
   def toZonedDateTime(date: String, time: String): ZonedDateTime = {

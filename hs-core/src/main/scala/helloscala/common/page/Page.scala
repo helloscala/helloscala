@@ -1,12 +1,14 @@
 package helloscala.common.page
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
 import java.util.UUID
 
+import com.typesafe.scalalogging.StrictLogging
+import helloscala.common.util.TimeUtils
 import org.apache.commons.lang3.StringUtils
 
 import scala.beans.BeanProperty
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * Created by yangbajing(yangbajing@gmail.com) on 2017-04-28.
@@ -46,7 +48,7 @@ trait Pager[T] {
 case class PageInput(
     @BeanProperty page: Int,
     @BeanProperty size: Int,
-    @BeanProperty params: Map[String, Any] = Map()) extends Page {
+    @BeanProperty params: Map[String, Any] = Map()) extends Page with StrictLogging {
 
   def toParamSeq: List[(String, Any)] = ("page", page) :: ("size", size) :: params.toList
 
@@ -55,13 +57,40 @@ case class PageInput(
   def getUUID(key: String): Option[UUID] = getString(key).flatMap(str => Try(UUID.fromString(str)).toOption)
 
   def getLocalDate(key: String): Option[LocalDate] =
-    getString(key).flatMap(str => Try(LocalDate.parse(str)).toOption)
+    getString(key).flatMap(str => Try(TimeUtils.toLocalDate(str)) match {
+      case Success(v) =>
+        Some(v)
+      case Failure(e) =>
+        logger.warn(s"getLocalDate($key) error: ${e.getMessage}", e)
+        None
+    })
 
   def getLocalTime(key: String): Option[LocalTime] =
-    getString(key).flatMap(str => Try(LocalTime.parse(str)).toOption)
+    getString(key).flatMap(str => Try(TimeUtils.toLocalTime(str)) match {
+      case Success(v) =>
+        Some(v)
+      case Failure(e) =>
+        logger.warn(s"getLocalTime($key) error: ${e.getMessage}", e)
+        None
+    })
 
   def getLocalDateTime(key: String): Option[LocalDateTime] =
-    getString(key).flatMap(str => Try(LocalDateTime.parse(str)).toOption)
+    getString(key).flatMap(str => Try(TimeUtils.toLocalDateTime(str)) match {
+      case Success(v) =>
+        Some(v)
+      case Failure(e) =>
+        logger.warn(s"getLocalDateTime($key) error: ${e.getMessage}", e)
+        None
+    })
+
+  def getZonedDateTime(key: String): Option[ZonedDateTime] =
+    getString(key).flatMap(str => Try(TimeUtils.toZonedDateTime(str)) match {
+      case Success(v) =>
+        Some(v)
+      case Failure(e) =>
+        logger.warn(s"getZonedDateTime($key) error: ${e.getMessage}", e)
+        None
+    })
 
   def getDouble(key: String): Option[Double] =
     params.get(key)
