@@ -1,6 +1,6 @@
 package helloscala.nosql.cassandra
 
-import com.datastax.driver.core.{Cluster, Session}
+import com.datastax.driver.core.Cluster
 import com.typesafe.config.ConfigFactory
 import helloscala.common.Configuration
 import helloscala.test.HelloscalaSpec

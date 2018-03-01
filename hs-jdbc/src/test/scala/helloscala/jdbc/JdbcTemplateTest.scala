@@ -1,21 +1,24 @@
 package helloscala.jdbc
 
+import java.time.ZonedDateTime
 import java.util.Properties
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import helloscala.test.HelloscalaSpec
 import org.scalatest.BeforeAndAfterAll
 
+import scala.beans.BeanProperty
+
 class JdbcTemplateTest extends HelloscalaSpec with BeforeAndAfterAll {
 
   val dataSource = {
     val props = new Properties()
     props.put("dataSourceClassName", "org.postgresql.ds.PGSimpleDataSource")
-    props.put("dataSource.serverName", "dn126")
+    props.put("dataSource.serverName", "localhost")
     props.put("dataSource.portNumber", "5432")
-    props.put("dataSource.databaseName", "recommend_system")
-    props.put("dataSource.user", "devops")
-    props.put("dataSource.password", "hl.Data2017")
+    props.put("dataSource.databaseName", "yangbajing")
+    props.put("dataSource.user", "yangbajing")
+    props.put("dataSource.password", "yangbajing")
     new HikariDataSource(new HikariConfig(props))
   }
 
@@ -52,8 +55,8 @@ class JdbcTemplateTest extends HelloscalaSpec with BeforeAndAfterAll {
     }
 
     "select from resource list" in {
-      val sql = "SELECT * FROM rs.resource LIMIT 10"
-      val list = jdbcTemplate.listForMap(sql, Nil).map(data => JdbcUtils.convertUnderscoreNameToPropertyName(data))
+      val sql = "SELECT * FROM test_table LIMIT 10"
+      val list = jdbcTemplate.listForObject(sql, Nil, rs => JdbcUtils.resultSetToBean[TestTable](rs))
       list.foreach(println)
       list must not be empty
     }
@@ -70,4 +73,14 @@ class JdbcTemplateTest extends HelloscalaSpec with BeforeAndAfterAll {
   }
 }
 
-case class TestTable(id: Long, name: String, age: Int)
+case class TestTable(
+    @BeanProperty var id: Long,
+    @BeanProperty var name: String,
+    @BeanProperty var age: Int,
+    @BeanProperty var createdAt: ZonedDateTime) {
+
+  def this() {
+    this(0, "", 0, null)
+  }
+
+}

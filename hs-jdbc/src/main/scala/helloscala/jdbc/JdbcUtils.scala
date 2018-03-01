@@ -1,17 +1,18 @@
 package helloscala.jdbc
 
+import java.lang.reflect.{Field, Modifier}
 import java.sql._
-import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
+import java.time._
 import java.util.{Properties, HashMap => JHashMap, Map => JMap}
 
 import com.typesafe.scalalogging.StrictLogging
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import helloscala.common.HSCommons
-import helloscala.common.util.{ClassUtils, NumberUtils, StringUtils}
-import helloscala.common.util.TimeUtils
+import helloscala.common.util._
 
 import scala.collection.mutable
 import scala.compat.java8.FunctionConverters._
+import scala.reflect.ClassTag
 
 /**
  * Created by yangbajing(yangbajing@gmail.com) on 2017-07-27.
@@ -34,6 +35,8 @@ object JdbcUtils extends StrictLogging {
    * @see java.sql.Types
    */
   val TYPE_UNKNOWN = Integer.MIN_VALUE
+
+  val BeanIgnoreClass = classOf[BeanIgnore]
 
   object Keys {
     val USE_TRANSACTION = "useTransaction"
@@ -64,7 +67,7 @@ object JdbcUtils extends StrictLogging {
       case '?' =>
         sqlBuf.append('?')
         isName = true
-      case c @ (',' | ')') if isName =>
+      case c@(',' | ')') if isName =>
         sqlBuf.append(c)
         idx += 1
         params += (paramBuf.mkString.trim -> idx)
@@ -81,8 +84,8 @@ object JdbcUtils extends StrictLogging {
   def generateWhere(wheres: Seq[AnyRef], step: String = AND): String = {
     val list = wheres.flatMap {
       case Some(partial) => Some(partial)
-      case None          => None
-      case partial       => Some(partial)
+      case None => None
+      case partial => Some(partial)
     }
     if (list.isEmpty) "" else list.mkString(" WHERE ", s" $step ", " ")
   }
@@ -140,9 +143,51 @@ object JdbcUtils extends StrictLogging {
     (1 to metaData.getColumnCount)
       .foreach { column =>
         val label = metaData.getColumnLabel(column)
-        result.put(label, getResultSetValue(rs, column) /*rs.getObject(label)*/ )
+        result.put(label, getResultSetValue(rs, column) /*rs.getObject(label)*/)
       }
     result
+  }
+
+  private def filterFields(fields: scala.Array[Field]): Map[String, Field] = {
+    val result = mutable.Map.empty[String, Field]
+    val len = fields.length
+    var i = 0
+    while (i < len) {
+      val field = fields(i)
+      val anns = field.getDeclaredAnnotations
+      val isInvalid = Modifier.isStatic(field.getModifiers) ||
+        anns.exists(ann => ann.annotationType() == BeanIgnoreClass)
+      if (!isInvalid) {
+        field.setAccessible(true)
+        result.put(field.getName, field)
+      }
+      i += 1
+    }
+    result.toMap
+  }
+
+  def resultSetToBean[T](rs: ResultSet)(implicit ev1: ClassTag[T]): T = resultSetToBean(rs, toPropertiesName = true)
+
+  def resultSetToBean[T](rs: ResultSet, toPropertiesName: Boolean)(implicit ev1: ClassTag[T]): T = {
+    val dest = ev1.runtimeClass.newInstance().asInstanceOf[T]
+    val cls = dest.getClass
+    val fields = filterFields(cls.getDeclaredFields)
+    val metaData = rs.getMetaData
+    var col = 1
+    val columnCount = metaData.getColumnCount
+    while (col <= columnCount) {
+      var label = metaData.getColumnLabel(col)
+      if (toPropertiesName) {
+        label = convertUnderscoreNameToPropertyName(label)
+      }
+      for (field <- fields.get(label)) {
+        val requiredType = field.getType
+        val value = getResultSetValue(rs, col, requiredType)
+        field.set(dest, value)
+      }
+      col += 1
+    }
+    dest
   }
 
   def preparedStatementCreator(sql: String, namedSql: String = ""): ConnectionPreparedStatementCreator =
@@ -212,10 +257,10 @@ object JdbcUtils extends StrictLogging {
   def setParameter(pstmt: PreparedStatement, i: Int, arg: Any): Unit = {
     val obj = arg match {
       case ldt: LocalDateTime => TimeUtils.toSqlTimestamp(ldt)
-      case ld: LocalDate      => TimeUtils.toSqlDate(ld)
-      case t: LocalTime       => TimeUtils.toSqlTime(t)
+      case ld: LocalDate => TimeUtils.toSqlDate(ld)
+      case t: LocalTime => TimeUtils.toSqlTime(t)
       case zdt: ZonedDateTime => TimeUtils.toSqlTimestamp(zdt)
-      case _                  => arg
+      case _ => arg
     }
     pstmt.setObject(i, obj)
   }
@@ -256,19 +301,31 @@ object JdbcUtils extends StrictLogging {
       }
     }
 
-  def getResultSetValue(rs: ResultSet, index: Int, requiredType: Class[_]): Any =
+  def getResultSetValue(
+      rs: ResultSet,
+      index: Int,
+      requiredType: Class[_],
+      defaultTimeZone: ZoneOffset = TimeUtils.ZONE_CHINA_OFFSET): Any =
     if (requiredType == null) {
       getResultSetValue(rs, index)
     } else if (classOf[String] == requiredType) {
       rs.getString(index)
     } else if (classOf[BigDecimal] == requiredType) {
       rs.getBigDecimal(index)
-    } else if (classOf[java.sql.Date] == requiredType) {
-      rs.getDate(index)
-    } else if (classOf[java.sql.Time] == requiredType) {
-      rs.getTime(index)
     } else if (classOf[java.sql.Timestamp] == requiredType) {
       rs.getTimestamp(index)
+    } else if (classOf[java.sql.Date] == requiredType) {
+      rs.getDate(index)
+    } else if (classOf[LocalDate] == requiredType) {
+      rs.getDate(index).toLocalDate
+    } else if (classOf[LocalTime] == requiredType) {
+      rs.getTime(index).toLocalTime
+    } else if (classOf[ZonedDateTime] == requiredType) {
+      rs.getTimestamp(index).toInstant.atZone(defaultTimeZone)
+    } else if (classOf[LocalDateTime] == requiredType) {
+      rs.getTimestamp(index).toLocalDateTime
+    } else if (classOf[java.sql.Time] == requiredType) {
+      rs.getTime(index)
     } else if (classOf[scala.Array[Byte]] == requiredType) {
       rs.getBytes(index)
     } else if (classOf[Blob] == requiredType) {
@@ -279,7 +336,7 @@ object JdbcUtils extends StrictLogging {
       rs.getObject(index) match {
         case s: String => s
         case n: Number => NumberUtils.convertNumberToTargetClass(n, classOf[Integer])
-        case _         => rs.getString(index)
+        case _ => rs.getString(index)
       }
     } else {
       var value: Any = null
@@ -309,21 +366,20 @@ object JdbcUtils extends StrictLogging {
             case ex: SQLException =>
               logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex)
           }
-        } else {
-          // Corresponding SQL types for JSR-310, left up
-          // to the caller to convert them (e.g. through a ConversionService).
-          val typeName = requiredType.getSimpleName
-          if ("LocalDate" == typeName) {
-            value = rs.getDate(index).toLocalDate
-          } else if ("LocalTime" == typeName) {
-            value = rs.getTime(index).toLocalTime
-          } else if ("LocalDateTime" == typeName) {
-            value = rs.getTimestamp(index).toLocalDateTime
-          } else {
-            // Fall back to getObject without type specification, again
-            // left up to the caller to convert the value if necessary.
-            value = getResultSetValue(rs, index)
-          }
+          //        } else {
+          //          // Corresponding SQL types for JSR-310, left up
+          //          // to the caller to convert them (e.g. through a ConversionService).
+          //          val typeName = requiredType.getSimpleName
+          //          value = typeName match {
+          //            case "ZonedDateTime" => rs.getTimestamp(index).toInstant.atZone(TimeUtils.ZONE_CHINA_OFFSET)
+          //            case "LocalDateTime" => rs.getTimestamp(index).toLocalDateTime
+          //            case "LocalDate"     => rs.getDate(index).toLocalDate
+          //            case "LocalTime"     => rs.getTime(index).toLocalTime
+          //            case _ =>
+          //              // Fall back to getObject without type specification, again
+          //              // left up to the caller to convert the value if necessary.
+          //              getResultSetValue(rs, index)
+          //          }
         }
       }
 
