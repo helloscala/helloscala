@@ -7,7 +7,7 @@ object Version {
 
   private def _version: String = sys.props.get("build.version")
     .orElse(sys.env.get("BUILD_VERSION"))
-    .getOrElse("1.1.1")
+    .getOrElse("1.1.2")
 
   lazy val versionning = Seq(
     version := (if (buildEnv.value == BuildEnv.Developement && !_version.endsWith("-SNAPSHOT")) s"${_version}-SNAPSHOT" else
