@@ -5,9 +5,9 @@ object Dependencies {
   val versionScala211 = "2.11.12"
   val versionScala212 = "2.12.4"
 
-  val _scalatest = "org.scalatest" %% "scalatest" % "3.0.4"
+  val _scalatest = "org.scalatest" %% "scalatest" % "3.0.5"
 
-  private val versionAkka = "2.5.10"
+  private val versionAkka = "2.5.11"
   lazy val _akka = Seq(
     "com.typesafe.akka" %% "akka-actor" % versionAkka,
     "com.typesafe.akka" %% "akka-slf4j" % versionAkka,
@@ -40,7 +40,7 @@ object Dependencies {
   val _alpakkaSlick = ("com.lightbend.akka" %% "akka-stream-alpakka-slick" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"))
 
-  private val versionAkkaHttp = "10.0.11"
+  private val versionAkkaHttp = "10.1.0"
   lazy val _akkaHttpCore = ("com.typesafe.akka" %% "akka-http-core" % versionAkkaHttp)
     .exclude("com.typesafe.akka", s"akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", s"akka-stream").cross(CrossVersion.binary)
@@ -55,7 +55,7 @@ object Dependencies {
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", "akka-stream").cross(CrossVersion.binary))
 
-  val swaggerVersion = "1.5.17"
+  val swaggerVersion = "1.5.18"
   val _swagger = Seq(
     "io.swagger" % "swagger-core" % swaggerVersion,
     //    "io.swagger" % "swagger-annotations" % swaggerVersion,
@@ -69,11 +69,11 @@ object Dependencies {
 
   val _swaggerAnnotation = "io.swagger" % "swagger-annotations" % swaggerVersion
 
-  val _typesafeConfig = "com.typesafe" % "config" % "1.3.2"
+  val _typesafeConfig = "com.typesafe" % "config" % "1.3.3"
 
-  val _scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
+  val _scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0"
 
-  private val versionJackson = "2.9.2"
+  private val versionJackson = "2.9.4"
   val _jackson = Seq(
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % versionJackson,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % versionJackson,
@@ -84,7 +84,7 @@ object Dependencies {
   lazy val _redis = ("net.debasishg" %% "redisclient" % "3.4")
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
 
-  private val versionSlick = "3.2.1"
+  private val versionSlick = "3.2.2"
   val _slick = Seq(
     "com.typesafe.slick" %% "slick" % versionSlick,
     "com.typesafe.slick" %% "slick-hikaricp" % versionSlick
@@ -95,7 +95,7 @@ object Dependencies {
     "com.github.tminglei" %% "slick-pg" % versionSlickPg
   )
 
-  private val versionElastic4s = "5.4.13"
+  private val versionElastic4s = "5.4.15"
   val _elastic4s = Seq(
     "com.sksamuel.elastic4s" %% "elastic4s-tcp" % versionElastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-xpack-security" % versionElastic4s
@@ -128,7 +128,7 @@ object Dependencies {
   val _guice = ("com.google.inject" % "guice" % versionGuice).exclude("com.google.guava", "guava")
   val _guiceAssistedinject = "com.google.inject.extensions" % "guice-assistedinject" % versionGuice
 
-  private val versionNetty = "4.1.20.Final"
+  private val versionNetty = "4.1.22.Final"
   val _nettyNativeEpoll = "io.netty" % "netty-transport-native-epoll" % versionNetty classifier "linux-x86_64"
   //  val _nettyAll = "io.netty" % "netty-all" % versionNetty
   val _nettyHandler = "io.netty" % "netty-handler" % versionNetty
@@ -146,7 +146,7 @@ object Dependencies {
 
   val _jsoup = "org.jsoup" % "jsoup" % "1.11.2"
 
-  val _commonsCodec = "commons-codec" % "commons-codec" % "1.11"
+//  val _commonsCodec = "commons-codec" % "commons-codec" % "1.11"
 
   val _commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.7"
 
@@ -159,7 +159,7 @@ object Dependencies {
     "org.apache.poi" % "poi-ooxml" % versionPoi
   )
 
-  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.6"
+  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.8"
 
   val _postgresql = "org.postgresql" % "postgresql" % "42.1.4"
 

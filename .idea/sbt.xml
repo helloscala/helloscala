@@ -42,7 +42,7 @@
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>
-        <option name="sbtVersion" value="1.0.4" />
+        <option name="sbtVersion" value="1.1.1" />
         <option name="useSbtShell" value="true" />
       </SbtProjectSettings>
     </option>

@@ -1,4 +1,6 @@
 /*
+ * Copyright 2017 helloscala.com
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.swagger.akka
 
 import scala.collection.JavaConverters._
@@ -31,13 +34,13 @@ package object model {
   case class License(name: String, url: String)
 
   case class Info(
-    description: String = "",
-    version: String = "",
-    title: String = "",
-    termsOfService: String = "",
-    contact: Option[Contact] = None,
-    license: Option[License] = None,
-    vendorExtensions: Map[String, Object] = Map.empty)
+      description: String = "",
+      version: String = "",
+      title: String = "",
+      termsOfService: String = "",
+      contact: Option[Contact] = None,
+      license: Option[License] = None,
+      vendorExtensions: Map[String, Object] = Map.empty)
 
   implicit def swagger2scala(convertMe: SwaggerContact): Option[Contact] = {
     if (convertMe == null) None else Some(Contact(convertMe.getName, convertMe.getUrl, convertMe.getEmail))
@@ -87,15 +90,15 @@ package object model {
     ret
   }
   def asScala[K, V](jmap: java.util.Map[K, V]): Map[K, V] = Option(jmap) match {
-    case None => Map.empty[K, V]
+    case None     => Map.empty[K, V]
     case Some(jm) => jm.asScala.toMap
   }
   def asScala[T](jlist: java.util.List[T]): List[T] = Option(jlist) match {
-    case None => List.empty[T]
+    case None     => List.empty[T]
     case Some(jl) => jl.asScala.toList
   }
   def asScala[T](jset: java.util.Set[T]): Set[T] = Option(jset) match {
-    case None => Set.empty[T]
+    case None     => Set.empty[T]
     case Some(js) => js.asScala.toSet
   }
   def asScala[T](jopt: java.util.Optional[T]): Option[T] = Option(jopt) flatMap { opt => opt.asScala }

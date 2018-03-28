@@ -20,13 +20,13 @@ class CryptoTest extends HelloscalaSpec {
     var encryptMsg: String = null
 
     "ddd" in {
-      val s1 = Crypto.encrypt_AES(makeTest(due), secret)
-      val s2 = Crypto.encrypt_AES(makeTest(due), secret)
-      val s3 = Crypto.encrypt_AES(makeTest(due), secret)
+      val s1 = Crypto.encryptAES(makeTest(due), secret)
+      val s2 = Crypto.encryptAES(makeTest(due), secret)
+      val s3 = Crypto.encryptAES(makeTest(due), secret)
 
-      val t1 = Crypto.decrypt_AES(s1, secret)
-      val t2 = Crypto.decrypt_AES(s2, secret)
-      val t3 = Crypto.decrypt_AES(s3, secret)
+      val t1 = Crypto.decryptAES(s1, secret)
+      val t2 = Crypto.decryptAES(s2, secret)
+      val t3 = Crypto.decryptAES(s3, secret)
 
       println(s"$s1\n$t1")
       println(s"$s2\n$t2")
@@ -34,12 +34,12 @@ class CryptoTest extends HelloscalaSpec {
     }
 
     "encrypt" in {
-      encryptMsg = Crypto.encrypt_AES(text, secret)
+      encryptMsg = Crypto.encryptAES(text, secret)
       println(s"Encrypt Msg: $encryptMsg")
     }
 
     "decrypt" in {
-      val decryptMsg = Crypto.decrypt_AES(encryptMsg, secret)
+      val decryptMsg = Crypto.decryptAES(encryptMsg, secret)
 
       decryptMsg mustBe text
     }

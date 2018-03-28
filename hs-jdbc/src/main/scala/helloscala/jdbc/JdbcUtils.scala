@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package helloscala.jdbc
 
 import java.lang.reflect.{Field, Modifier}
@@ -67,7 +83,7 @@ object JdbcUtils extends StrictLogging {
       case '?' =>
         sqlBuf.append('?')
         isName = true
-      case c@(',' | ')') if isName =>
+      case c @ (',' | ')') if isName =>
         sqlBuf.append(c)
         idx += 1
         params += (paramBuf.mkString.trim -> idx)
@@ -84,8 +100,8 @@ object JdbcUtils extends StrictLogging {
   def generateWhere(wheres: Seq[AnyRef], step: String = AND): String = {
     val list = wheres.flatMap {
       case Some(partial) => Some(partial)
-      case None => None
-      case partial => Some(partial)
+      case None          => None
+      case partial       => Some(partial)
     }
     if (list.isEmpty) "" else list.mkString(" WHERE ", s" $step ", " ")
   }
@@ -143,7 +159,7 @@ object JdbcUtils extends StrictLogging {
     (1 to metaData.getColumnCount)
       .foreach { column =>
         val label = metaData.getColumnLabel(column)
-        result.put(label, getResultSetValue(rs, column) /*rs.getObject(label)*/)
+        result.put(label, getResultSetValue(rs, column) /*rs.getObject(label)*/ )
       }
     result
   }
@@ -256,11 +272,14 @@ object JdbcUtils extends StrictLogging {
 
   def setParameter(pstmt: PreparedStatement, i: Int, arg: Any): Unit = {
     val obj = arg match {
-      case ldt: LocalDateTime => TimeUtils.toSqlTimestamp(ldt)
-      case ld: LocalDate => TimeUtils.toSqlDate(ld)
-      case t: LocalTime => TimeUtils.toSqlTime(t)
-      case zdt: ZonedDateTime => TimeUtils.toSqlTimestamp(zdt)
-      case _ => arg
+      case zdt: ZonedDateTime   => Timestamp.from(zdt.toInstant)
+      case ldt: LocalDateTime   => Timestamp.valueOf(ldt)
+      case d: java.util.Date    => new Date(d.getTime)
+      case ld: LocalDate        => Date.valueOf(ld)
+      case odt: OffsetDateTime  => Timestamp.from(odt.toInstant)
+      case t: LocalTime         => java.sql.Time.valueOf(t)
+      case e: Enumeration#Value => e.id
+      case _                    => arg
     }
     pstmt.setObject(i, obj)
   }
@@ -336,7 +355,7 @@ object JdbcUtils extends StrictLogging {
       rs.getObject(index) match {
         case s: String => s
         case n: Number => NumberUtils.convertNumberToTargetClass(n, classOf[Integer])
-        case _ => rs.getString(index)
+        case _         => rs.getString(index)
       }
     } else {
       var value: Any = null

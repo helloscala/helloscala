@@ -1,14 +1,26 @@
-/**
- * 正则相关工具函数
- * Created by yangbajing(yangbajing@gmail.com) on 2017-03-08.
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package helloscala.common.util
 
 import java.nio.ByteBuffer
 import java.nio.file.{Files, Path}
 import java.security.SecureRandom
 import java.time.{LocalDate, LocalDateTime}
-import java.util.Properties
+import java.util.{Properties, Random}
 import java.util.concurrent.ThreadLocalRandom
 
 import scala.compat.java8.FunctionConverters._
@@ -23,6 +35,29 @@ class Utils extends Serializable {
   val random: SecureRandom = new SecureRandom()
 
   def swap[X, Y](x: X, y: Y): (Y, X) = (y, x)
+
+  /**
+   * 将数组原地乱序
+   * @param arr 原打乱元素顺序的数组
+   * @return 已打乱顺序的数组
+   */
+  def random[@specialized(Specializable.AllNumeric) T](arr: Array[T]): Array[T] = {
+    val random = new Random()
+    var i = 0
+    val len = arr.length
+    while (i < len) {
+      val si = random.nextInt(len)
+      if (i != si) {
+        val tmp = arr(si)
+        arr(si) = arr(i)
+        arr(i) = tmp
+        i += 2
+      } else {
+        i += 1
+      }
+    }
+    arr
+  }
 
   /**
    * 将字符串解析为数字

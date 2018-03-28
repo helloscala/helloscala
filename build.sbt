@@ -143,7 +143,7 @@ lazy val hsCore = coreProject("hs-core")
     libraryDependencies ++= Seq(
       _swaggerAnnotation % Provided,
       _hikariCP % Provided,
-      _commonsLang3,
+//      _commonsLang3,
       _bouncycastleProvider,
       _log4jToSlf4j,
       _scalaLogging,

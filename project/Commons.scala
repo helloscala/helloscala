@@ -12,11 +12,12 @@ object Commons {
   //  )
 
   def basicSettings = Version.versionning ++ Seq(
-    organization := "com.hualongdata",
-    organizationName := "hualongdata.com",
-    organizationHomepage := Some(url("https://hualongdata.com")),
-    homepage := Some(url("http://ig.hualongdata.com")),
+    organization := "com.hellescala",
+    organizationName := "helloscala.com",
+    organizationHomepage := Some(url("https://helloscala.com")),
+    homepage := Some(url("http://hs.helloscala.com")),
     startYear := Some(2017),
+    licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
     scalaVersion := Dependencies.versionScala211,
     crossScalaVersions := Seq(Dependencies.versionScala211, Dependencies.versionScala212),
     scalacOptions ++= Seq(

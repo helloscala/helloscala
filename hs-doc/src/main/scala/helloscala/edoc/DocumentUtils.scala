@@ -1,12 +1,23 @@
-/**
- * doc/docx 帮助函数
+/*
+ * Copyright 2017 helloscala.com
  *
- * Created by yangbajing(yangbajing@gmail.com) on 2017-05-12.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package helloscala.edoc
 
-import java.io.{ IOException, InputStream }
-import java.nio.file.{ Files, Path }
+import java.io.{IOException, InputStream}
+import java.nio.file.{Files, Path}
 
 import helloscala.common.util.StringUtils
 import org.apache.poi.POIXMLDocument

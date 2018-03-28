@@ -1,7 +1,23 @@
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package helloscala.http.session
 
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{ Directive0, Directive1 }
+import akka.http.scaladsl.server.{Directive0, Directive1}
 
 import scala.concurrent.ExecutionContext
 
@@ -17,7 +33,7 @@ trait SessionDirectives extends OneOffSessionDirectives with RefreshableSessionD
    */
   def setSession[T](sc: SessionContinuity[T], st: SetSessionTransport, v: T): Directive0 = {
     sc match {
-      case _: OneOff[T] => setOneOffSession(sc, st, v)
+      case _: OneOff[T]      => setOneOffSession(sc, st, v)
       case r: Refreshable[T] => setRefreshableSession(r, st, v)
     }
   }
@@ -30,7 +46,7 @@ trait SessionDirectives extends OneOffSessionDirectives with RefreshableSessionD
    */
   def session[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive1[SessionResult[T]] = {
     sc match {
-      case _: OneOff[T] => oneOffSession(sc, st)
+      case _: OneOff[T]      => oneOffSession(sc, st)
       case r: Refreshable[T] => refreshableSession(r, st)
     }
   }
@@ -45,7 +61,7 @@ trait SessionDirectives extends OneOffSessionDirectives with RefreshableSessionD
    */
   def invalidateSession[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive0 = {
     sc match {
-      case _: OneOff[T] => invalidateOneOffSession(sc, st)
+      case _: OneOff[T]      => invalidateOneOffSession(sc, st)
       case r: Refreshable[T] => invalidateOneOffSession(sc, st) & invalidateRefreshableSession(r, st)
     }
   }
@@ -61,7 +77,7 @@ trait SessionDirectives extends OneOffSessionDirectives with RefreshableSessionD
    */
   def requiredSession[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive1[T] =
     optionalSession(sc, st).flatMap {
-      case None => reject(sc.clientSessionManager.sessionMissingRejection)
+      case None       => reject(sc.clientSessionManager.sessionMissingRejection)
       case Some(data) => provide(data)
     }
 
@@ -99,9 +115,9 @@ object SessionOptions {
   def oneOff[T](implicit manager: SessionManager[T]): OneOff[T] = new OneOff[T]()(manager)
 
   def refreshable[T](implicit
-    manager: SessionManager[T],
-    refreshTokenStorage: RefreshTokenStorage[T],
-    ec: ExecutionContext): Refreshable[T] =
+      manager: SessionManager[T],
+      refreshTokenStorage: RefreshTokenStorage[T],
+      ec: ExecutionContext): Refreshable[T] =
     new Refreshable[T]()(manager, refreshTokenStorage, ec)
 
   def usingCookies = CookieST
@@ -118,7 +134,7 @@ trait OneOffSessionDirectives {
 
   private[session] def setOneOffSessionSameTransport[T](sc: SessionContinuity[T], st: GetSessionTransport, v: T): Directive0 =
     read(sc, st).flatMap {
-      case None => pass
+      case None             => pass
       case Some((_, setSt)) => setOneOffSession(sc, setSt, v)
     }
 
@@ -130,15 +146,15 @@ trait OneOffSessionDirectives {
       .map(_.map(h => (h, HeaderST: SetSessionTransport)))
   private def read[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive1[Option[(String, SetSessionTransport)]] =
     st match {
-      case CookieST => readCookie(sc)
-      case HeaderST => readHeader(sc)
+      case CookieST         => readCookie(sc)
+      case HeaderST         => readHeader(sc)
       case CookieOrHeaderST => readCookie(sc).flatMap(_.fold(readHeader(sc))(v => provide(Some(v))))
     }
 
   private[session] def oneOffSession[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive1[SessionResult[T]] = {
     read(sc, st).map {
       case Some((v, _)) => sc.clientSessionManager.decode(v)
-      case None => SessionResult.NoSession
+      case None         => SessionResult.NoSession
     }
   }
 
@@ -146,7 +162,7 @@ trait OneOffSessionDirectives {
     readCookie(sc).flatMap {
       case None =>
         readHeader(sc).flatMap {
-          case None => pass
+          case None    => pass
           case Some(_) => respondWithHeader(sc.clientSessionManager.createHeaderWithValue(""))
         }
 
@@ -168,8 +184,8 @@ trait RefreshableSessionDirectives { this: OneOffSessionDirectives =>
       .map(_.map(h => (h, HeaderST: SetSessionTransport)))
   private def read[T](sc: SessionContinuity[T], st: GetSessionTransport): Directive1[Option[(String, SetSessionTransport)]] =
     st match {
-      case CookieST => readCookie(sc)
-      case HeaderST => readHeader(sc)
+      case CookieST         => readCookie(sc)
+      case HeaderST         => readHeader(sc)
       case CookieOrHeaderST => readCookie(sc).flatMap(_.fold(readHeader(sc))(v => provide(Some(v))))
     }
 

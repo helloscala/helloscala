@@ -1,6 +1,22 @@
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package helloscala.jdbc
 
-import java.sql.{ Connection, PreparedStatement, SQLException }
+import java.sql.{Connection, PreparedStatement, SQLException}
 import javax.sql.DataSource
 
 import scala.collection.mutable
@@ -22,30 +38,30 @@ class JdbcHelper(dataSource: DataSource) {
    */
   @throws(classOf[SQLException])
   def executeUpdate(
-    sql: String,
-    args: Object*)(
-    implicit
-    hlConn: JdbcConnection = JdbcConnection.empty): Int = {
+      sql: String,
+      args: Object*)(
+      implicit
+      hlConn: JdbcConnection = JdbcConnection.empty): Int = {
     val func = (pstmt: PreparedStatement) => pstmt.executeUpdate()
 
     execute(func, sql, args)
   }
 
   def executeSingle(
-    sql: String,
-    args: Object*)(
-    implicit
-    igConn: JdbcConnection = JdbcConnection.empty): Option[(Map[String, Object], Vector[HSSqlMetaData])] = {
+      sql: String,
+      args: Object*)(
+      implicit
+      igConn: JdbcConnection = JdbcConnection.empty): Option[(Map[String, Object], Vector[HSSqlMetaData])] = {
     val (results, metaDatas) = executeQuery(sql, args)
     //    if (results.size > 1) throw new IllegalAccessException(s"$sql 返回结果大于1行")
     results.headOption.map(map => (map, metaDatas))
   }
 
   def executeQuery(
-    sql: String,
-    args: Object*)(
-    implicit
-    igConn: JdbcConnection = JdbcConnection.empty): (Vector[Map[String, Object]], Vector[HSSqlMetaData]) = {
+      sql: String,
+      args: Object*)(
+      implicit
+      igConn: JdbcConnection = JdbcConnection.empty): (Vector[Map[String, Object]], Vector[HSSqlMetaData]) = {
     val func = (pstmt: PreparedStatement) => {
       val results = mutable.ArrayBuffer.empty[Map[String, Object]]
       val rs = pstmt.executeQuery()
@@ -70,10 +86,10 @@ class JdbcHelper(dataSource: DataSource) {
   }
 
   def execute[R](
-    resultSetFunc: PreparedStatement => R,
-    sql: String, args: Object*)(
-    implicit
-    igConn: JdbcConnection = JdbcConnection.empty): R =
+      resultSetFunc: PreparedStatement => R,
+      sql: String, args: Object*)(
+      implicit
+      igConn: JdbcConnection = JdbcConnection.empty): R =
     _execute { conn =>
       val pstmt = conn.underlying.prepareStatement(sql)
       for ((arg, idx) <- args.zipWithIndex) {
@@ -84,8 +100,8 @@ class JdbcHelper(dataSource: DataSource) {
     }
 
   private def _execute[R](func: JdbcConnection => R)(
-    implicit
-    igConn: JdbcConnection = JdbcConnection.empty): R = {
+      implicit
+      igConn: JdbcConnection = JdbcConnection.empty): R = {
     val conn = if (igConn == JdbcConnection.empty) JdbcConnection(dataSource.getConnection) else igConn
     try {
       func(conn)
@@ -121,10 +137,10 @@ object JdbcHelper {
   def apply(ds: DataSource): JdbcHelper = new JdbcHelper(ds)
 
   def execute[R](
-    conn: Connection,
-    resultSetFunc: PreparedStatement => R,
-    sql: String,
-    args: Object*): R = {
+      conn: Connection,
+      resultSetFunc: PreparedStatement => R,
+      sql: String,
+      args: Object*): R = {
     execute { conn =>
       val pstmt = conn.prepareStatement(sql)
       for ((arg, idx) <- args.zipWithIndex) {

@@ -1,7 +1,19 @@
-/**
- * Cassandra连接会话，默认需要使用keyspace。如：hl_test.www_page。
- * Created by yangbajing(yangbajing@gmail.com) on 2017-03-22.
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package helloscala.nosql.cassandra
 
 import java.util
@@ -9,14 +21,14 @@ import java.util
 import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{Sink, Source}
 import com.datastax.driver.core._
-import com.google.common.util.concurrent.{ FutureCallback, Futures, ListenableFuture, MoreExecutors }
+import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFuture, MoreExecutors}
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.annotation.varargs
 import scala.collection.immutable
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{Future, Promise}
 
 private class CqlCache(session: => Session) extends StrictLogging {
   private val map = new util.HashMap[String, PreparedStatement]()
@@ -63,7 +75,7 @@ trait CassandraSession {
    * 获得 Cassandra 连接 Session
    */
   protected implicit lazy val defaultSession: Session = conf.keyspace match {
-    case None => cluster.connect()
+    case None           => cluster.connect()
     case Some(keyspace) => cluster.connect(keyspace)
   }
 

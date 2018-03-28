@@ -1,28 +1,44 @@
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package helloscala.http.server
 
 import java.nio.file.Paths
-import java.security.{ KeyStore, SecureRandom }
-import javax.net.ssl.{ KeyManagerFactory, SSLContext, TrustManagerFactory }
+import java.security.{KeyStore, SecureRandom}
+import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.settings.ServerSettings
-import akka.http.scaladsl.{ ConnectionContext, Http, HttpsConnectionContext }
+import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
 import com.typesafe.scalalogging.StrictLogging
 import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import helloscala.common.util.StringUtils
-import helloscala.common.{ Configuration, HSCommons, PidFile }
-import helloscala.http.core.server.{ BaseExceptionPF, BaseRejectionBuilder }
+import helloscala.common.{Configuration, HSCommons, PidFile}
+import helloscala.http.core.server.{BaseExceptionPF, BaseRejectionBuilder}
 import helloscala.http.model.HSServerHeader
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContextExecutor, Future }
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.control.NonFatal
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 /**
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-08.

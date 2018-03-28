@@ -1,52 +1,68 @@
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package helloscala.http.session
 
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ ConfigValueFactory, ConfigFactory, Config }
+import com.typesafe.config.{ConfigValueFactory, ConfigFactory, Config}
 
 case class CookieConfig(
-  name: String,
-  domain: Option[String],
-  path: Option[String],
-  secure: Boolean,
-  httpOnly: Boolean)
+    name: String,
+    domain: Option[String],
+    path: Option[String],
+    secure: Boolean,
+    httpOnly: Boolean)
 
 case class HeaderConfig(
-  sendToClientHeaderName: String,
-  getFromClientHeaderName: String)
+    sendToClientHeaderName: String,
+    getFromClientHeaderName: String)
 
 case class SessionConfig(
-  /**
-   * Should be different on each environment and **kept secret!**. It's used to sign and encrypt cookie data.
-   * This should be a long random string.
-   */
-  serverSecret: String,
-  sessionCookieConfig: CookieConfig,
-  sessionHeaderConfig: HeaderConfig,
-  /**
-   * If you'd like session cookies to expire as well after a period of inactivity, you can optionally include an
-   * expiration date in the cookie data (expiration will be validated on the server). The expiration date will be
-   * calculated by adding the given number of seconds to the time at which the session is last updated.
-   */
-  sessionMaxAgeSeconds: Option[Long],
-  /**
-   * By default the session data won't be encrypted, only signed with a hash. Set this to true if you'd like the data
-   * to be encrypted using a symmetrical key.
-   */
-  sessionEncryptData: Boolean,
-  csrfCookieConfig: CookieConfig,
-  /**
-   * Name of the header or form field in which the CSRF token will be submitted.
-   */
-  csrfSubmittedName: String,
-  refreshTokenCookieConfig: CookieConfig,
-  refreshTokenHeaderConfig: HeaderConfig,
-  refreshTokenMaxAgeSeconds: Long,
-  /**
-   * When a refresh token is used to log in, a new one is generated. The old one should be deleted with a delay,
-   * to properly serve concurrent requests using the old token.
-   */
-  removeUsedRefreshTokenAfter: Long) {
+    /**
+     * Should be different on each environment and **kept secret!**. It's used to sign and encrypt cookie data.
+     * This should be a long random string.
+     */
+    serverSecret: String,
+    sessionCookieConfig: CookieConfig,
+    sessionHeaderConfig: HeaderConfig,
+    /**
+     * If you'd like session cookies to expire as well after a period of inactivity, you can optionally include an
+     * expiration date in the cookie data (expiration will be validated on the server). The expiration date will be
+     * calculated by adding the given number of seconds to the time at which the session is last updated.
+     */
+    sessionMaxAgeSeconds: Option[Long],
+    /**
+     * By default the session data won't be encrypted, only signed with a hash. Set this to true if you'd like the data
+     * to be encrypted using a symmetrical key.
+     */
+    sessionEncryptData: Boolean,
+    csrfCookieConfig: CookieConfig,
+    /**
+     * Name of the header or form field in which the CSRF token will be submitted.
+     */
+    csrfSubmittedName: String,
+    refreshTokenCookieConfig: CookieConfig,
+    refreshTokenHeaderConfig: HeaderConfig,
+    refreshTokenMaxAgeSeconds: Long,
+    /**
+     * When a refresh token is used to log in, a new one is generated. The old one should be deleted with a delay,
+     * to properly serve concurrent requests using the old token.
+     */
+    removeUsedRefreshTokenAfter: Long) {
   require(serverSecret.length >= 64, "Server secret must be at least 64 characters long!")
 }
 

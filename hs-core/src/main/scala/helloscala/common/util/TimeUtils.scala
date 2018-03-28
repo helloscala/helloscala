@@ -1,7 +1,19 @@
-/**
- * 时间、日期工具函数
- * Created by yangbajing(yangbajing@gmail.com) on 2017-03-08.
+/*
+ * Copyright 2017 helloscala.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package helloscala.common.util
 
 import java.sql.{Date => SQLDate, Time => SQLTime, Timestamp => SQLTimestamp}
@@ -32,6 +44,38 @@ object TimeUtils extends StrictLogging {
   def now(): LocalDateTime = LocalDateTime.now()
 
   def nowTimestamp(): SQLTimestamp = SQLTimestamp.from(Instant.now())
+
+  def min(x: ZonedDateTime, y: ZonedDateTime): ZonedDateTime = {
+    if (x.isBefore(y)) x else y
+  }
+
+  def max(x: ZonedDateTime, y: ZonedDateTime): ZonedDateTime = {
+    if (x.isAfter(y)) x else y
+  }
+
+  def min(x: LocalDateTime, y: LocalDateTime): LocalDateTime = {
+    if (x.isBefore(y)) x else y
+  }
+
+  def max(x: LocalDateTime, y: LocalDateTime): LocalDateTime = {
+    if (x.isAfter(y)) x else y
+  }
+
+  def min(x: LocalDate, y: LocalDate): LocalDate = {
+    if (x.isBefore(y)) x else y
+  }
+
+  def max(x: LocalDate, y: LocalDate): LocalDate = {
+    if (x.isAfter(y)) x else y
+  }
+
+  def min(x: LocalTime, y: LocalTime): LocalTime = {
+    if (x.isBefore(y)) x else y
+  }
+
+  def max(x: LocalTime, y: LocalTime): LocalTime = {
+    if (x.isAfter(y)) x else y
+  }
 
   /**
    * 函数执行时间
