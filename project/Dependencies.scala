@@ -3,11 +3,11 @@ import sbt.Keys._
 
 object Dependencies {
   val versionScala211 = "2.11.12"
-  val versionScala212 = "2.12.4"
+  val versionScala212 = "2.12.6"
 
   val _scalatest = "org.scalatest" %% "scalatest" % "3.0.5"
 
-  private val versionAkka = "2.5.11"
+  private val versionAkka = "2.5.12"
   lazy val _akka = Seq(
     "com.typesafe.akka" %% "akka-actor" % versionAkka,
     "com.typesafe.akka" %% "akka-slf4j" % versionAkka,
@@ -19,9 +19,9 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-stream-testkit" % versionAkka
   )
 
-  val _akkaStreamKafka = "com.typesafe.akka" %% "akka-stream-kafka" % "0.17"
+  val _akkaStreamKafka = "com.typesafe.akka" %% "akka-stream-kafka" % "0.20"
 
-  private val versionAlpakka = "0.17"
+  private val versionAlpakka = "0.18"
   val _alpakkaCassandra = ("com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"), ExclusionRule("com.datastax.cassandra"), ExclusionRule("io.netty"), ExclusionRule("com.google.guava"))
 
@@ -40,7 +40,7 @@ object Dependencies {
   val _alpakkaSlick = ("com.lightbend.akka" %% "akka-stream-alpakka-slick" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"))
 
-  private val versionAkkaHttp = "10.1.0"
+  private val versionAkkaHttp = "10.1.1"
   lazy val _akkaHttpCore = ("com.typesafe.akka" %% "akka-http-core" % versionAkkaHttp)
     .exclude("com.typesafe.akka", s"akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", s"akka-stream").cross(CrossVersion.binary)
@@ -49,8 +49,7 @@ object Dependencies {
   lazy val _akkaHttp = Seq(
     "com.typesafe.akka" %% "akka-http" % versionAkkaHttp,
     _akkaHttpTest % Test,
-    //    "com.typesafe" %% "ssl-config-akka" % "0.2.2",
-    "ch.megard" %% "akka-http-cors" % "0.2.2"
+    "ch.megard" %% "akka-http-cors" % "0.3.0"
   ).map(_
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", "akka-stream").cross(CrossVersion.binary))
@@ -84,13 +83,13 @@ object Dependencies {
   lazy val _redis = ("net.debasishg" %% "redisclient" % "3.4")
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
 
-  private val versionSlick = "3.2.2"
+  private val versionSlick = "3.2.3"
   val _slick = Seq(
     "com.typesafe.slick" %% "slick" % versionSlick,
     "com.typesafe.slick" %% "slick-hikaricp" % versionSlick
   )
 
-  private val versionSlickPg = "0.15.5"
+  private val versionSlickPg = "0.15.7"
   val _slickPg = Seq(
     "com.github.tminglei" %% "slick-pg" % versionSlickPg
   )
@@ -159,9 +158,9 @@ object Dependencies {
     "org.apache.poi" % "poi-ooxml" % versionPoi
   )
 
-  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.8"
+  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.9"
 
-  val _postgresql = "org.postgresql" % "postgresql" % "42.1.4"
+  val _postgresql = "org.postgresql" % "postgresql" % "42.2.2"
 
   val _mysql = "mysql" % "mysql-connector-java" % "6.0.6"
 
@@ -183,6 +182,6 @@ object Dependencies {
 
   val _junit4 = "junit" % "junit" % "4.12"
 
-  val _log4jToSlf4j = "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.10.0"
+  val _log4jToSlf4j = "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.9.1"
 }
 

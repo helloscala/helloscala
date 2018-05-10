@@ -296,7 +296,7 @@ object HttpUtils extends StrictLogging {
       protocol: HttpProtocol = HttpProtocols.`HTTP/1.1`)(implicit mat: ActorMaterializer): Future[HttpResponse] = {
     val request = HttpRequest(
       method,
-      uri.withQuery(Uri.Query(params: _*)),
+      uri.withQuery(Uri.Query(uri.query() ++ params: _*)),
       headers,
       entity = data match {
         case null                    => HttpEntity.Empty
@@ -349,7 +349,7 @@ object HttpUtils extends StrictLogging {
     } else {
       HttpEntity.Empty
     }
-    hostRequest(HttpRequest(method, uri.withQuery(Uri.Query(params: _*)), headers, entity))
+    hostRequest(HttpRequest(method, uri.withQuery(Uri.Query(uri.query() ++ params: _*)), headers, entity))
   }
 
   def makeRequest(

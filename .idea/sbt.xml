@@ -42,11 +42,11 @@
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>
-        <option name="sbtVersion" value="1.1.1" />
+        <option name="sbtVersion" value="1.1.4" />
         <option name="useSbtShell" value="true" />
       </SbtProjectSettings>
     </option>
     <option name="maximumHeapSize" value="2048" />
-    <option name="vmParameters" value="" />
+    <option name="vmParameters" value="-Dbuild.env=prod" />
   </component>
 </project>
