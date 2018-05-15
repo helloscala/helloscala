@@ -5,7 +5,7 @@
  */
 package helloscala.edoc
 
-import java.nio.file.{ Files, Paths }
+import java.nio.file.{Files, Paths}
 
 import helloscala.test.HelloscalaSpec
 

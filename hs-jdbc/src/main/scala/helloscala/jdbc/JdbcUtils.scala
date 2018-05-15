@@ -270,16 +270,18 @@ object JdbcUtils extends StrictLogging {
     pstmt
   }
 
+  private val JAVA_UTIL_DATE_NAME = "java.util.Date"
+
   def setParameter(pstmt: PreparedStatement, i: Int, arg: Any): Unit = {
     val obj = arg match {
-      case zdt: ZonedDateTime   => Timestamp.from(zdt.toInstant)
-      case ldt: LocalDateTime   => Timestamp.valueOf(ldt)
-      case d: java.util.Date    => new Date(d.getTime)
-      case ld: LocalDate        => Date.valueOf(ld)
-      case odt: OffsetDateTime  => Timestamp.from(odt.toInstant)
-      case t: LocalTime         => java.sql.Time.valueOf(t)
+      case zdt: ZonedDateTime => Timestamp.from(zdt.toInstant)
+      case ldt: LocalDateTime => Timestamp.valueOf(ldt)
+      case ld: LocalDate => Date.valueOf(ld)
+      case odt: OffsetDateTime => Timestamp.from(odt.toInstant)
+      case t: LocalTime => java.sql.Time.valueOf(t)
       case e: Enumeration#Value => e.id
-      case _                    => arg
+      case d: java.util.Date if d.getClass.getName == JAVA_UTIL_DATE_NAME => new Date(d.getTime)
+      case _ => arg
     }
     pstmt.setObject(i, obj)
   }

@@ -5,9 +5,9 @@ import java.util
 import scala.collection.JavaConverters._
 
 import com.github.swagger.akka.samples.DictHttpService
-import io.swagger.models.auth.{ BasicAuthDefinition, SecuritySchemeDefinition }
+import io.swagger.models.auth.{BasicAuthDefinition, SecuritySchemeDefinition}
 import io.swagger.models._
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{Matchers, WordSpec}
 
 class SwaggerGeneratorSpec extends WordSpec with Matchers {
 

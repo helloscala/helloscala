@@ -18,7 +18,7 @@ package com.github.swagger.akka.samples
 import java.time.LocalDateTime
 import java.util.Date
 
-import io.swagger.annotations.{ ApiModel, ApiModelProperty }
+import io.swagger.annotations.{ApiModel, ApiModelProperty}
 
 import scala.annotation.meta.field
 
@@ -40,9 +40,9 @@ object SwaggerModelBuilderSpecValues {
 
 @ApiModel(description = "an entry in the dictionary")
 case class DictEntry(
-  val key: String,
-  val value: String,
-  val expire: Option[Long])
+    val key: String,
+    val value: String,
+    val expire: Option[Long])
 
 import com.github.swagger.akka.samples.SwaggerModelBuilderSpecValues._
 
@@ -61,27 +61,27 @@ sealed trait TestModelParent {
 
 @ApiModel(description = TestModelDescription)
 case class TestModel(
-  @(ApiModelProperty @field)(value = NameDescription) name: String,
-  @(ApiModelProperty @field)(value = CountDescription) count: Int,
-  @(ApiModelProperty @field)(value = IsStaleDescription) isStale: Boolean,
-  @(ApiModelProperty @field)(value = OffsetDescription) offset: Option[Int] = None,
-  @(ApiModelProperty @field)(value = NodesDescription) nodes: List[TestModelNode] = List[TestModelNode](),
-  @(ApiModelProperty @field)(
-    value = EnumDescription,
-    dataType = "com.github.swagger.akka.samples.TestEnum$") testEnum: TestEnum.TestEnum = TestEnum.AEnum,
-  @(ApiModelProperty @field)(value = StartDateDescription) startDate: Date,
-  @(ApiModelProperty @field)(value = EndDateDescription) endDate: LocalDateTime,
-  noAnnotationProperty: String,
-  secondNoAnnotationProperty: String,
-  @(ApiModelProperty @field)(value = AllowableDescription, allowableValues = "first, second") allowable: String) extends TestModelParent
+    @(ApiModelProperty @field)(value = NameDescription) name: String,
+    @(ApiModelProperty @field)(value = CountDescription) count: Int,
+    @(ApiModelProperty @field)(value = IsStaleDescription) isStale: Boolean,
+    @(ApiModelProperty @field)(value = OffsetDescription) offset: Option[Int] = None,
+    @(ApiModelProperty @field)(value = NodesDescription) nodes: List[TestModelNode] = List[TestModelNode](),
+    @(ApiModelProperty @field)(
+      value = EnumDescription,
+      dataType = "com.github.swagger.akka.samples.TestEnum$") testEnum: TestEnum.TestEnum = TestEnum.AEnum,
+    @(ApiModelProperty @field)(value = StartDateDescription) startDate: Date,
+    @(ApiModelProperty @field)(value = EndDateDescription) endDate: LocalDateTime,
+    noAnnotationProperty: String,
+    secondNoAnnotationProperty: String,
+    @(ApiModelProperty @field)(value = AllowableDescription, allowableValues = "first, second") allowable: String) extends TestModelParent
 
 @ApiModel(description = TestModelDescription)
 case class ModelWithCustomPropertyDatatypes(
-  @(ApiModelProperty @field)(value = CountDescription, dataType = "long") count: BigInt,
-  @(ApiModelProperty @field)(value = IsStaleDescription, dataType = "boolean") isStale: Any,
-  @(ApiModelProperty @field)(value = OffsetDescription, dataType = "list[integer]") offset: Iterable[(Int, Boolean)],
-  @(ApiModelProperty @field)(value = EndDateDescription, dataType = "date", required = false) endDate: Option[String],
-  @(ApiModelProperty @field)(value = AmountDescription, dataType = "double") amount: BigDecimal
+    @(ApiModelProperty @field)(value = CountDescription, dataType = "long") count: BigInt,
+    @(ApiModelProperty @field)(value = IsStaleDescription, dataType = "boolean") isStale: Any,
+    @(ApiModelProperty @field)(value = OffsetDescription, dataType = "list[integer]") offset: Iterable[(Int, Boolean)],
+    @(ApiModelProperty @field)(value = EndDateDescription, dataType = "date", required = false) endDate: Option[String],
+    @(ApiModelProperty @field)(value = AmountDescription, dataType = "double") amount: BigDecimal
 /*
   @(ApiModelProperty @field)(value = NameDescription, dataType = "CustomType", required = false)
   nonDefaultTypeField: Option[String]
@@ -111,7 +111,7 @@ object TestEnum extends Enumeration {
 
 @ApiModel
 case class TestModelNode(
-  value: Option[String])
+    value: Option[String])
 
 case class A() extends Letter
 case class B() extends Letter
@@ -122,17 +122,17 @@ abstract class Letter
 
 @ApiModel
 case class TestModelPositions(
-  @(ApiModelProperty @field)(position = 3, value = "") arg3: String,
-  @(ApiModelProperty @field)(position = 1, value = "") arg1: String,
-  @(ApiModelProperty @field)(position = 2, value = "") arg2: String,
-  @(ApiModelProperty @field)(position = 0, value = "") arg0: String)
+    @(ApiModelProperty @field)(position = 3, value = "") arg3: String,
+    @(ApiModelProperty @field)(position = 1, value = "") arg1: String,
+    @(ApiModelProperty @field)(position = 2, value = "") arg2: String,
+    @(ApiModelProperty @field)(position = 0, value = "") arg0: String)
 
 @ApiModel(description = "Standard reply envelope containing a list of resources")
 case class ListReply[T](
-  @(ApiModelProperty @field)(value = "List of requested items (in current page if paged)") items: List[T],
-  @(ApiModelProperty @field)(value = "Total number of items in the reply (across all pages if applicable)") total: Int,
-  @(ApiModelProperty @field)(
-    value = "Identifier used to fetch the next page of results",
-    dataType = "string") nextPageToken: Option[String],
-  @(ApiModelProperty @field)(value = "Offset within the total count of results where this current items list starts") offset: Int,
-  @(ApiModelProperty @field)(value = "Limit on the number of items included in a single response page", dataType = "int") limit: Option[Int])
+    @(ApiModelProperty @field)(value = "List of requested items (in current page if paged)") items: List[T],
+    @(ApiModelProperty @field)(value = "Total number of items in the reply (across all pages if applicable)") total: Int,
+    @(ApiModelProperty @field)(
+      value = "Identifier used to fetch the next page of results",
+      dataType = "string") nextPageToken: Option[String],
+    @(ApiModelProperty @field)(value = "Offset within the total count of results where this current items list starts") offset: Int,
+    @(ApiModelProperty @field)(value = "Limit on the number of items included in a single response page", dataType = "int") limit: Option[Int])

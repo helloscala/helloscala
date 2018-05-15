@@ -18,13 +18,13 @@ package com.github.swagger.akka.samples
 import javax.ws.rs.Path
 
 import com.github.swagger.akka._
-import com.github.swagger.akka.model.{ Contact, Info, License }
+import com.github.swagger.akka.model.{Contact, Info, License}
 
-import akka.actor.{ ActorRefFactory, ActorSystem }
+import akka.actor.{ActorRefFactory, ActorSystem}
 import akka.http.scaladsl.model.ContentTypes.`application/json`
 import akka.http.scaladsl.model.StatusCodes.OK
-import akka.http.scaladsl.model.{ HttpEntity, HttpResponse }
-import akka.http.scaladsl.server.{ Directives, Route }
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
+import akka.http.scaladsl.server.{Directives, Route}
 import io.swagger.annotations._
 
 case class Dog(breed: String)

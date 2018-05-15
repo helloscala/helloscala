@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.stream.scaladsl.Sink
-import com.datastax.driver.core.{ Cluster, Session, SimpleStatement }
+import com.datastax.driver.core.{Cluster, Session, SimpleStatement}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
