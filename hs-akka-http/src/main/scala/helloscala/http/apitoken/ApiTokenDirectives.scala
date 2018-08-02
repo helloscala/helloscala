@@ -104,7 +104,7 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
     }
 
     extract { ctx =>
-      val appId = findHeader(ctx, HttpConstants.HS_APP_ID).right.map(str => ObjectId.apply(str))
+      val appId = findHeader(ctx, HttpConstants.HS_APP_ID)
       val timestamp = findHeader(ctx, HttpConstants.HS_TIMESTAMP)
       val echoStr = findHeader(ctx, HttpConstants.HS_ECHO_STR)
       val accessToken = findHeader(ctx, HttpConstants.HS_ACCESS_TOKEN)

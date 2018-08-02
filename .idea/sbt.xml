@@ -45,9 +45,9 @@
           </set>
         </option>
         <option name="resolveClassifiers" value="false" />
-        <option name="sbtVersion" value="1.1.4" />
         <option name="useSbtShell" value="true" />
       </SbtProjectSettings>
     </option>
+    <option name="vmParameters" value="-Dbuild.env=prod" />
   </component>
 </project>

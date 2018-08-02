@@ -24,7 +24,7 @@ import helloscala.common.util.StringUtils
 import scala.collection.immutable
 
 trait BaseApiToken {
-  def id: ObjectId
+  def id: String
   def key: String
   def encodingAesKey: String
   def email: String
@@ -40,7 +40,7 @@ trait BaseApiToken {
  * @param echoStr     随机字符串（不能超过40位字符，有效字符范围：[a-z][A-Z][0-9]）
  * @param accessToken 调用方传过来的访问令牌
  */
-case class ApiTokenInput(appId: ObjectId, timestamp: String, echoStr: String, accessToken: String) {
+case class ApiTokenInput(appId: String, timestamp: String, echoStr: String, accessToken: String) {
 
   import ApiTokenInput._
 
