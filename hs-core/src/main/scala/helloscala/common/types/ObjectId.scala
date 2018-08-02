@@ -19,7 +19,7 @@ package helloscala.common.types
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonTypeName}
 import helloscala.common.util.StringUtils
 
 import scala.util.{Failure, Try}
@@ -32,6 +32,7 @@ import scala.util.{Failure, Try}
  * +        (4 bytes)       +        (3 bytes)       +        (2 bytes)       +        (3 bytes)       +
  * +------------------------+------------------------+------------------------+------------------------+
  */
+@JsonTypeName("string")
 @SerialVersionUID(239421902L) //@ApiModel(parent = classOf[String])
 class ObjectId private (private val raw: Array[Byte]) extends Serializable with Equals {
 

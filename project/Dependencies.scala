@@ -7,7 +7,7 @@ object Dependencies {
 
   val _scalatest = "org.scalatest" %% "scalatest" % "3.0.5"
 
-  private val versionAkka = "2.5.12"
+  private val versionAkka = "2.5.14"
   lazy val _akka = Seq(
     "com.typesafe.akka" %% "akka-actor" % versionAkka,
     "com.typesafe.akka" %% "akka-slf4j" % versionAkka,
@@ -21,7 +21,7 @@ object Dependencies {
 
   val _akkaStreamKafka = "com.typesafe.akka" %% "akka-stream-kafka" % "0.20"
 
-  private val versionAlpakka = "0.18"
+  private val versionAlpakka = "0.20"
   val _alpakkaCassandra = ("com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"), ExclusionRule("com.datastax.cassandra"), ExclusionRule("io.netty"), ExclusionRule("com.google.guava"))
 
@@ -40,7 +40,7 @@ object Dependencies {
   val _alpakkaSlick = ("com.lightbend.akka" %% "akka-stream-alpakka-slick" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"))
 
-  private val versionAkkaHttp = "10.1.1"
+  private val versionAkkaHttp = "10.1.3"
   lazy val _akkaHttpCore = ("com.typesafe.akka" %% "akka-http-core" % versionAkkaHttp)
     .exclude("com.typesafe.akka", s"akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", s"akka-stream").cross(CrossVersion.binary)
@@ -54,7 +54,7 @@ object Dependencies {
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
     .exclude("com.typesafe.akka", "akka-stream").cross(CrossVersion.binary))
 
-  val swaggerVersion = "1.5.18"
+  val swaggerVersion = "1.5.20"
   val _swagger = Seq(
     "io.swagger" % "swagger-core" % swaggerVersion,
     //    "io.swagger" % "swagger-annotations" % swaggerVersion,
@@ -70,9 +70,9 @@ object Dependencies {
 
   val _typesafeConfig = "com.typesafe" % "config" % "1.3.3"
 
-  val _scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0"
+  val _scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
 
-  private val versionJackson = "2.9.4"
+  private val versionJackson = "2.9.6"
   val _jackson = Seq(
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % versionJackson,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % versionJackson,
@@ -80,7 +80,7 @@ object Dependencies {
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % versionJackson,
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % versionJackson)
 
-  lazy val _redis = ("net.debasishg" %% "redisclient" % "3.4")
+  lazy val _redis = ("net.debasishg" %% "redisclient" % "3.7")
     .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
 
   private val versionSlick = "3.2.3"
@@ -89,7 +89,7 @@ object Dependencies {
     "com.typesafe.slick" %% "slick-hikaricp" % versionSlick
   )
 
-  private val versionSlickPg = "0.15.7"
+  private val versionSlickPg = "0.16.3"
   val _slickPg = Seq(
     "com.github.tminglei" %% "slick-pg" % versionSlickPg
   )
@@ -127,7 +127,7 @@ object Dependencies {
   val _guice = ("com.google.inject" % "guice" % versionGuice).exclude("com.google.guava", "guava")
   val _guiceAssistedinject = "com.google.inject.extensions" % "guice-assistedinject" % versionGuice
 
-  private val versionNetty = "4.1.22.Final"
+  private val versionNetty = "4.1.28.Final"
   val _nettyNativeEpoll = "io.netty" % "netty-transport-native-epoll" % versionNetty classifier "linux-x86_64"
   //  val _nettyAll = "io.netty" % "netty-all" % versionNetty
   val _nettyHandler = "io.netty" % "netty-handler" % versionNetty
@@ -143,7 +143,7 @@ object Dependencies {
 
   val _curator = ("org.apache.curator" % "curator-framework" % "2.12.0").exclude("log4j", "log4j")
 
-  val _jsoup = "org.jsoup" % "jsoup" % "1.11.2"
+  val _jsoup = "org.jsoup" % "jsoup" % "1.11.3"
 
 //  val _commonsCodec = "commons-codec" % "commons-codec" % "1.11"
 
@@ -158,22 +158,22 @@ object Dependencies {
     "org.apache.poi" % "poi-ooxml" % versionPoi
   )
 
-  val _hikariCP = "com.zaxxer" % "HikariCP" % "2.7.9"
+  val _hikariCP = "com.zaxxer" % "HikariCP" % "3.1.0" // "2.7.9"
 
   val _postgresql = "org.postgresql" % "postgresql" % "42.2.2"
 
   val _mysql = "mysql" % "mysql-connector-java" % "6.0.6"
 
-  private val versionTika = "1.17"
+  private val versionTika = "1.18"
   val _tika = Seq(
     ("org.apache.tika" % "tika-parsers" % versionTika)
       .excludeAll(ExclusionRule("org.apache.poi")),
     "org.apache.tika" % "tika-langdetect" % versionTika
   )
 
-  val _seleniumJava = "org.seleniumhq.selenium" % "selenium-java" % "3.8.1"
+  val _seleniumJava = "org.seleniumhq.selenium" % "selenium-java" % "3.12.0"
 
-  val _okhttp = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
+  val _okhttp = "com.squareup.okhttp3" % "okhttp" % "3.11.0"
 
   private val versionQuartz = "2.2.3"
   val _quartz = "org.quartz-scheduler" % "quartz" % versionQuartz
@@ -182,6 +182,6 @@ object Dependencies {
 
   val _junit4 = "junit" % "junit" % "4.12"
 
-  val _log4jToSlf4j = "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.9.1"
+  val _log4jToSlf4j = "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.1"
 }
 

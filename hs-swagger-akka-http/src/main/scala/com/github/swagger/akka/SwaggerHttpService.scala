@@ -25,7 +25,7 @@ import io.swagger.jaxrs.Reader
 import io.swagger.jaxrs.config.DefaultReaderConfig
 import io.swagger.models.auth.SecuritySchemeDefinition
 import io.swagger.models.{ExternalDocs, Scheme, Swagger}
-import io.swagger.util.{DeserializationModule, Yaml}
+import io.swagger.util.Yaml
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 

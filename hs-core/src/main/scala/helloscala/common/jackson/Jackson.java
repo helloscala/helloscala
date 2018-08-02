@@ -17,10 +17,7 @@
 package helloscala.common.jackson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.JsonTokenId;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,7 +65,8 @@ class ZonedDateTimeDeserializer extends JSR310DateTimeDeserializerBase<ZonedDate
             try {
                 return TimeUtils.toZonedDateTime(string);
             } catch (DateTimeException e) {
-                _rethrowDateTimeException(parser, context, e, string);
+//                _rethrowDateTimeException(parser, context, e, string);
+                throw new JsonParseException(parser, string, e);
             }
         }
         if (parser.isExpectedStartArrayToken()) {
@@ -132,7 +130,7 @@ class ZonedDateTimeDeserializer extends JSR310DateTimeDeserializerBase<ZonedDate
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-14.
  */
 public class Jackson {
-    public static final ObjectMapper defaultObjectMapper = getObjectMapper();
+    public static final ObjectMapper defaultObjectMapper = createObjectMapper();
 
     public static ObjectNode createObjectNode() {
         return defaultObjectMapper.createObjectNode();
@@ -142,14 +140,18 @@ public class Jackson {
         return defaultObjectMapper.createArrayNode();
     }
 
-    private static ObjectMapper getObjectMapper() {
+    public static ObjectMapper createObjectMapper() {
+        return createObjectMapper(null);
+    }
+
+    public static ObjectMapper createObjectMapper(JsonFactory jf) {
         JavaTimeModule jtm = new JavaTimeModule();
         jtm.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(TimeUtils.formatterDateTime()));
         jtm.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(TimeUtils.formatterDateTime()));
         jtm.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer(TimeUtils.formatterDateTime()));
         jtm.addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
 
-        return new ObjectMapper()
+        return new ObjectMapper(jf)
                 .findAndRegisterModules()
                 .registerModule(new HelloscalaModule())
                 .registerModule(jtm)
