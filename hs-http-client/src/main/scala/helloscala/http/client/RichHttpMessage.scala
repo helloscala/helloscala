@@ -34,29 +34,41 @@ final class RichHttpRequest(val request: HttpRequest) extends AnyVal {
     withUri(request.uri.withQuery(query))
   }
 
-  def withUri(uri: Uri): RichHttpRequest = new RichHttpRequest(request.copy(uri = uri))
+  def withUri(uri: Uri): RichHttpRequest =
+    new RichHttpRequest(request.copy(uri = uri))
 
-  def withHttpMethod(method: HttpMethod): RichHttpRequest = new RichHttpRequest(request.copy(method = method))
+  def withHttpMethod(method: HttpMethod): RichHttpRequest =
+    new RichHttpRequest(request.copy(method = method))
 
   def withHeaders(hh: Seq[HttpHeader]): RichHttpRequest =
     new RichHttpRequest(request.copy(headers = request.headers ++ hh))
 
-  def withEntity(entity: RequestEntity): RichHttpRequest = new RichHttpRequest(request.copy(entity = entity))
+  def withEntity(entity: RequestEntity): RichHttpRequest =
+    new RichHttpRequest(request.copy(entity = entity))
 
-  def withBody[A](body: A)(implicit m: Marshaller[A, RequestEntity], ec: ExecutionContext, atMost: Duration = 10.seconds): RichHttpRequest = {
+  def withBody[A](body: A)(
+      implicit m: Marshaller[A, RequestEntity],
+      ec: ExecutionContext,
+      atMost: Duration = 10.seconds): RichHttpRequest = {
     val future = Marshal(body).to[RequestEntity]
     val entity = Await.result(future, atMost)
     withEntity(entity)
   }
 
-  def execute(followRedirect: Boolean = true)(implicit mat: ActorMaterializer, ec: ExecutionContext = null): Future[(String, HttpResponse)] = {
-    val executionContext: ExecutionContext = if (ec == null) mat.executionContext else ec
+  def execute(followRedirect: Boolean = true)(
+      implicit mat: ActorMaterializer,
+      ec: ExecutionContext = null): Future[(String, HttpResponse)] = {
+    val executionContext: ExecutionContext =
+      if (ec == null) mat.executionContext else ec
     HttpUtils
       .singleRequest(request)
       .flatMap {
         case response if response.status.isRedirection() && followRedirect =>
-          val redirectUri = response.headers.find(_.name() == Location.name).get.value()
-          HttpUtils.singleRequest(HttpMethods.GET, redirectUri).map(resp => redirectUri -> resp)(executionContext)
+          val redirectUri =
+            response.headers.find(_.name() == Location.name).get.value()
+          HttpUtils
+            .singleRequest(HttpMethods.GET, redirectUri)
+            .map(resp => redirectUri -> resp)(executionContext)
         case response =>
           Future.successful(request.uri.toString() -> response)
       }

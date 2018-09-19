@@ -21,6 +21,7 @@ import scala.language.implicitConversions
 
 object MapConverters {
 
-  implicit def toImmutableMap[A, B](m: java.util.Map[A, B]): scala.collection.immutable.Map[A, B] = m.asScala.toMap
+  implicit def toImmutableMap[A, B](m: java.util.Map[A, B]): scala.collection.immutable.Map[A, B] =
+    m.asScala.toMap
 
 }

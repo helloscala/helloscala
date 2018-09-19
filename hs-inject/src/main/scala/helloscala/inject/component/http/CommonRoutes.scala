@@ -31,7 +31,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 @Singleton
-class CommonRoutes @Inject() (
+class CommonRoutes @Inject()(
     appLifecycle: DefaultAppLifecycle,
     actorSystem: ActorSystem,
     configuration: Configuration) {

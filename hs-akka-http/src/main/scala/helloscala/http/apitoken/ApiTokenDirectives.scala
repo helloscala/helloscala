@@ -56,7 +56,8 @@ trait ApiTokenExtractDirectives {
  */
 trait ApiTokenDirectives extends ApiTokenExtractDirectives {
 
-  def apiTokenOff[T](implicit tokenStorage: TokenStorage[T]): ApiTokenOff[T] = DefaultApiTokenOff(tokenStorage)
+  def apiTokenOff[T](implicit tokenStorage: TokenStorage[T]): ApiTokenOff[T] =
+    DefaultApiTokenOff(tokenStorage)
 
   /**
    * 获取 [[ApiTokenInput]] 对象
@@ -69,7 +70,8 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
         onSuccess(tokenOff.storage.lookup(in))
           .flatMap {
             case Right(result) => provide(result)
-            case Left(err)     => reject(ApiTokenRejection(err.getMessage, Option(err)))
+            case Left(err) =>
+              reject(ApiTokenRejection(err.getMessage, Option(err)))
           }
       }
 
@@ -93,14 +95,18 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
       .flatMap { in =>
         onSuccess(tokenOff.storage.authorization(in))
           .flatMap {
-            case Right(result) => mapRequestContext(rc => new ApiTokenRequestContext(result, rc))
-            case Left(rjt)     => reject(rjt)
+            case Right(result) =>
+              mapRequestContext(rc => new ApiTokenRequestContext(result, rc))
+            case Left(rjt) => reject(rjt)
           }
       }
 
   private def getHeader: Directive1[ApiTokenInput] = {
     def findHeader(ctx: RequestContext, headerName: String) = {
-      ctx.request.headers.find(_.is(headerName)).map(_.value()).toEither(headerName)
+      ctx.request.headers
+        .find(_.is(headerName))
+        .map(_.value())
+        .toEither(headerName)
     }
 
     extract { ctx =>
@@ -110,8 +116,10 @@ trait ApiTokenDirectives extends ApiTokenExtractDirectives {
       val accessToken = findHeader(ctx, HttpConstants.HS_ACCESS_TOKEN)
 
       if (appId.isLeft || timestamp.isLeft || echoStr.isLeft || accessToken.isLeft) {
-        val msg = Iterator(appId.left.toOption, timestamp.left.toOption, echoStr.left.toOption, accessToken.left.toOption)
-          .flatten
+        val msg = Iterator(appId.left.toOption,
+                           timestamp.left.toOption,
+                           echoStr.left.toOption,
+                           accessToken.left.toOption).flatten
           .mkString("需要：", ", ", "")
         Left(msg)
       } else {

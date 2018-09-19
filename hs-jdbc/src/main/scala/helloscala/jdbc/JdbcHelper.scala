@@ -37,9 +37,7 @@ class JdbcHelper(dataSource: DataSource) {
    * @throws SQLException SQL执行或数据库异常
    */
   @throws(classOf[SQLException])
-  def executeUpdate(
-      sql: String,
-      args: Object*)(
+  def executeUpdate(sql: String, args: Object*)(
       implicit
       hlConn: JdbcConnection = JdbcConnection.empty): Int = {
     val func = (pstmt: PreparedStatement) => pstmt.executeUpdate()
@@ -47,9 +45,7 @@ class JdbcHelper(dataSource: DataSource) {
     execute(func, sql, args)
   }
 
-  def executeSingle(
-      sql: String,
-      args: Object*)(
+  def executeSingle(sql: String, args: Object*)(
       implicit
       igConn: JdbcConnection = JdbcConnection.empty): Option[(Map[String, Object], Vector[HSSqlMetaData])] = {
     val (results, metaDatas) = executeQuery(sql, args)
@@ -57,9 +53,7 @@ class JdbcHelper(dataSource: DataSource) {
     results.headOption.map(map => (map, metaDatas))
   }
 
-  def executeQuery(
-      sql: String,
-      args: Object*)(
+  def executeQuery(sql: String, args: Object*)(
       implicit
       igConn: JdbcConnection = JdbcConnection.empty): (Vector[Map[String, Object]], Vector[HSSqlMetaData]) = {
     val func = (pstmt: PreparedStatement) => {
@@ -70,13 +64,12 @@ class JdbcHelper(dataSource: DataSource) {
       val range = (1 to metaData.getColumnCount).toVector
 
       val labels = range.map(column =>
-        HSSqlMetaData(
-          metaData.getColumnLabel(column),
-          metaData.getColumnName(column),
-          metaData.getColumnType(column)))
+        HSSqlMetaData(metaData.getColumnLabel(column), metaData.getColumnName(column), metaData.getColumnType(column)))
 
       while (rs.next()) {
-        val maps = range.map(column => labels(column - 1).label -> rs.getObject(column)).toMap
+        val maps = range
+          .map(column => labels(column - 1).label -> rs.getObject(column))
+          .toMap
         results += maps
       }
       (results.toVector, labels)
@@ -85,9 +78,7 @@ class JdbcHelper(dataSource: DataSource) {
     execute(func, sql, args)
   }
 
-  def execute[R](
-      resultSetFunc: PreparedStatement => R,
-      sql: String, args: Object*)(
+  def execute[R](resultSetFunc: PreparedStatement => R, sql: String, args: Object*)(
       implicit
       igConn: JdbcConnection = JdbcConnection.empty): R =
     _execute { conn =>
@@ -102,7 +93,10 @@ class JdbcHelper(dataSource: DataSource) {
   private def _execute[R](func: JdbcConnection => R)(
       implicit
       igConn: JdbcConnection = JdbcConnection.empty): R = {
-    val conn = if (igConn == JdbcConnection.empty) JdbcConnection(dataSource.getConnection) else igConn
+    val conn =
+      if (igConn == JdbcConnection.empty)
+        JdbcConnection(dataSource.getConnection)
+      else igConn
     try {
       func(conn)
     } finally {
@@ -136,11 +130,7 @@ object JdbcHelper {
 
   def apply(ds: DataSource): JdbcHelper = new JdbcHelper(ds)
 
-  def execute[R](
-      conn: Connection,
-      resultSetFunc: PreparedStatement => R,
-      sql: String,
-      args: Object*): R = {
+  def execute[R](conn: Connection, resultSetFunc: PreparedStatement => R, sql: String, args: Object*): R = {
     execute { conn =>
       val pstmt = conn.prepareStatement(sql)
       for ((arg, idx) <- args.zipWithIndex) {

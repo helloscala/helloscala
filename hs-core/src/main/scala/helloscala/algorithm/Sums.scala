@@ -28,8 +28,6 @@ object Sums {
     else list.head + recursiveSum(list.tail)
   }
 
-  def main(args: Array[String]): Unit = {
-
-  }
+  def main(args: Array[String]): Unit = {}
 
 }

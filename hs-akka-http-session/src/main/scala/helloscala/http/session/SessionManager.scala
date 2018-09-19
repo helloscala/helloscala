@@ -27,21 +27,23 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SessionManager[T](val config: SessionConfig)(implicit sessionEncoder: SessionEncoder[T]) { manager =>
 
-  val clientSessionManager: ClientSessionManager[T] = new ClientSessionManager[T] {
-    override def config = manager.config
-    override def sessionEncoder = manager.sessionEncoder
-    override def nowMillis = manager.nowMillis
-  }
+  val clientSessionManager: ClientSessionManager[T] =
+    new ClientSessionManager[T] {
+      override def config = manager.config
+      override def sessionEncoder = manager.sessionEncoder
+      override def nowMillis = manager.nowMillis
+    }
 
   val csrfManager: CsrfManager[T] = new CsrfManager[T] {
     override def config = manager.config
   }
 
-  def createRefreshTokenManager(_storage: RefreshTokenStorage[T]): RefreshTokenManager[T] = new RefreshTokenManager[T] {
-    override def config = manager.config
-    override def nowMillis = manager.nowMillis
-    override def storage = _storage
-  }
+  def createRefreshTokenManager(_storage: RefreshTokenStorage[T]): RefreshTokenManager[T] =
+    new RefreshTokenManager[T] {
+      override def config = manager.config
+      override def nowMillis = manager.nowMillis
+      override def storage = _storage
+    }
 
   def nowMillis = System.currentTimeMillis()
 }
@@ -55,35 +57,40 @@ trait ClientSessionManager[T] {
 
   def createCookie(data: T) = createCookieWithValue(encode(data))
 
-  def createCookieWithValue(value: String) = HttpCookie(
-    name = config.sessionCookieConfig.name,
-    value = value,
-    expires = None,
-    maxAge = None,
-    domain = config.sessionCookieConfig.domain,
-    path = config.sessionCookieConfig.path,
-    secure = config.sessionCookieConfig.secure,
-    httpOnly = config.sessionCookieConfig.httpOnly)
+  def createCookieWithValue(value: String) =
+    HttpCookie(
+      name = config.sessionCookieConfig.name,
+      value = value,
+      expires = None,
+      maxAge = None,
+      domain = config.sessionCookieConfig.domain,
+      path = config.sessionCookieConfig.path,
+      secure = config.sessionCookieConfig.secure,
+      httpOnly = config.sessionCookieConfig.httpOnly
+    )
 
   def createHeader(data: T) = createHeaderWithValue(encode(data))
 
-  def createHeaderWithValue(value: String) = RawHeader(
-    name = config.sessionHeaderConfig.sendToClientHeaderName,
-    value = value)
+  def createHeaderWithValue(value: String) =
+    RawHeader(name = config.sessionHeaderConfig.sendToClientHeaderName, value = value)
 
   def encode(data: T): String = sessionEncoder.encode(data, nowMillis, config)
 
   def decode(data: String): SessionResult[T] = {
-    sessionEncoder.decode(data, config).map { dr =>
-      val expired = config.sessionMaxAgeSeconds.fold(false)(_ => nowMillis > dr.expires.getOrElse(Long.MaxValue))
-      if (expired) {
-        SessionResult.Expired
-      } else if (!dr.signatureMatches) {
-        SessionResult.Corrupt(new RuntimeException("Corrupt signature"))
-      } else {
-        SessionResult.Decoded(dr.t)
+    sessionEncoder
+      .decode(data, config)
+      .map { dr =>
+        val expired = config.sessionMaxAgeSeconds.fold(false)(_ => nowMillis > dr.expires.getOrElse(Long.MaxValue))
+        if (expired) {
+          SessionResult.Expired
+        } else if (!dr.signatureMatches) {
+          SessionResult.Corrupt(new RuntimeException("Corrupt signature"))
+        } else {
+          SessionResult.Decoded(dr.t)
+        }
       }
-    }.recover { case t: Exception => SessionResult.Corrupt(t) }.get
+      .recover { case t: Exception => SessionResult.Corrupt(t) }
+      .get
   }
 
   def sessionMissingRejection = SessionRejection("Session Missing")
@@ -95,14 +102,16 @@ trait CsrfManager[T] {
   def tokenInvalidRejection = SessionRejection("Token Invalid")
   def createToken(): String = SessionUtil.randomString(64)
 
-  def createCookie() = HttpCookie(
-    name = config.csrfCookieConfig.name,
-    value = createToken(),
-    expires = None,
-    domain = config.csrfCookieConfig.domain,
-    path = config.csrfCookieConfig.path,
-    secure = config.csrfCookieConfig.secure,
-    httpOnly = config.csrfCookieConfig.httpOnly)
+  def createCookie() =
+    HttpCookie(
+      name = config.csrfCookieConfig.name,
+      value = createToken(),
+      expires = None,
+      domain = config.csrfCookieConfig.domain,
+      path = config.csrfCookieConfig.path,
+      secure = config.csrfCookieConfig.secure,
+      httpOnly = config.csrfCookieConfig.httpOnly
+    )
 }
 
 trait RefreshTokenManager[T] {
@@ -118,7 +127,8 @@ trait RefreshTokenManager[T] {
     if (s.length == 2) Some((s(0), s(1))) else None
   }
 
-  def encodeSelectorAndToken(selector: String, token: String): String = s"$selector:$token"
+  def encodeSelectorAndToken(selector: String, token: String): String =
+    s"$selector:$token"
 
   /**
    * Creates and stores a new token, removing the old one after a configured period of time, if it exists.
@@ -128,11 +138,13 @@ trait RefreshTokenManager[T] {
     val selector = createSelector()
     val token = createToken()
 
-    val storeFuture = storage.store(new RefreshTokenData[T](
-      forSession = session,
-      selector = selector,
-      tokenHash = Crypto.hashSHA256(token),
-      expires = nowMillis + config.refreshTokenMaxAgeSeconds * 1000L)).map(_ => encodeSelectorAndToken(selector, token))
+    val storeFuture = storage
+      .store(
+        new RefreshTokenData[T](forSession = session,
+                                selector = selector,
+                                tokenHash = Crypto.hashSHA256(token),
+                                expires = nowMillis + config.refreshTokenMaxAgeSeconds * 1000L))
+      .map(_ => encodeSelectorAndToken(selector, token))
 
     existing.flatMap(decodeSelectorAndToken).foreach {
       case (s, _) =>
@@ -144,19 +156,20 @@ trait RefreshTokenManager[T] {
     storeFuture
   }
 
-  def createCookie(value: String) = HttpCookie(
-    name = config.refreshTokenCookieConfig.name,
-    value = value,
-    expires = None,
-    maxAge = Some(config.refreshTokenMaxAgeSeconds),
-    domain = config.refreshTokenCookieConfig.domain,
-    path = config.refreshTokenCookieConfig.path,
-    secure = config.refreshTokenCookieConfig.secure,
-    httpOnly = config.refreshTokenCookieConfig.httpOnly)
+  def createCookie(value: String) =
+    HttpCookie(
+      name = config.refreshTokenCookieConfig.name,
+      value = value,
+      expires = None,
+      maxAge = Some(config.refreshTokenMaxAgeSeconds),
+      domain = config.refreshTokenCookieConfig.domain,
+      path = config.refreshTokenCookieConfig.path,
+      secure = config.refreshTokenCookieConfig.secure,
+      httpOnly = config.refreshTokenCookieConfig.httpOnly
+    )
 
-  def createHeader(value: String) = RawHeader(
-    name = config.refreshTokenHeaderConfig.sendToClientHeaderName,
-    value = value)
+  def createHeader(value: String) =
+    RawHeader(name = config.refreshTokenHeaderConfig.sendToClientHeaderName, value = value)
 
   def sessionFromValue(value: String)(implicit ec: ExecutionContext): Future[SessionResult[T]] = {
     decodeSelectorAndToken(value) match {
@@ -166,7 +179,9 @@ trait RefreshTokenManager[T] {
             if (lookupResult.expires < nowMillis) {
               storage.remove(selector).map(_ => SessionResult.Expired)
             } else if (!SessionUtil.constantTimeEquals(Crypto.hashSHA256(token), lookupResult.tokenHash)) {
-              storage.remove(selector).map(_ => SessionResult.Corrupt(new RuntimeException("Corrupt token hash")))
+              storage
+                .remove(selector)
+                .map(_ => SessionResult.Corrupt(new RuntimeException("Corrupt token hash")))
             } else {
               Future.successful(SessionResult.CreatedFromToken(lookupResult.createSession()))
             }
@@ -174,7 +189,8 @@ trait RefreshTokenManager[T] {
           case None =>
             Future.successful(SessionResult.TokenNotFound)
         }
-      case None => Future.successful(SessionResult.Corrupt(new RuntimeException("Cannot decode selector/token")))
+      case None =>
+        Future.successful(SessionResult.Corrupt(new RuntimeException("Cannot decode selector/token")))
     }
   }
 
@@ -191,10 +207,12 @@ sealed trait SessionResult[+T] {
 }
 
 object SessionResult {
+
   trait SessionValue[T] extends SessionResult[T] {
     def session: T
     def toOption: Option[T] = Some(session)
   }
+
   trait NoSessionValue[T] extends SessionResult[T] {
     def toOption: Option[T] = None
   }

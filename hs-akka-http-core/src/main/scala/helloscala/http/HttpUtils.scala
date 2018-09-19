@@ -68,10 +68,14 @@ object HttpUtils extends StrictLogging {
       response: HttpResponse
   )(
       implicit
-      mat: Materializer, um: FromEntityUnmarshaller[R] = JacksonSupport.unmarshaller, ec: ExecutionContext = null
+      mat: Materializer,
+      um: FromEntityUnmarshaller[R] = JacksonSupport.unmarshaller,
+      ec: ExecutionContext = null
   ): Future[Either[HSException, R]] =
     if (HttpUtils.haveSuccess(response.status)) {
-      Unmarshal(response.entity).to[R].map(v => Right(v))(if (ec eq null) mat.executionContext else ec)
+      Unmarshal(response.entity)
+        .to[R]
+        .map(v => Right(v))(if (ec eq null) mat.executionContext else ec)
     } else {
       mapHttpResponseError[R](response)
     }
@@ -80,14 +84,20 @@ object HttpUtils extends StrictLogging {
       response: HttpResponse
   )(
       implicit
-      ev1: ClassTag[R], mat: Materializer, ec: ExecutionContext = null
+      ev1: ClassTag[R],
+      mat: Materializer,
+      ec: ExecutionContext = null
   ): Future[Either[HSException, List[R]]] = {
     if (HttpUtils.haveSuccess(response.status)) {
       Unmarshal(response.entity)
         .to[ArrayNode](JacksonSupport.unmarshaller, ec, mat)
         .map { array =>
           val list = array.asScala
-            .map(node => Jackson.defaultObjectMapper.treeToValue(node, ev1.runtimeClass).asInstanceOf[R])
+            .map(
+              node =>
+                Jackson.defaultObjectMapper
+                  .treeToValue(node, ev1.runtimeClass)
+                  .asInstanceOf[R])
             .toList
           Right(list)
         }(if (ec eq null) mat.executionContext else ec)
@@ -100,25 +110,32 @@ object HttpUtils extends StrictLogging {
       response: HttpResponse
   )(
       implicit
-      mat: Materializer, ec: ExecutionContext = null
+      mat: Materializer,
+      ec: ExecutionContext = null
   ): Future[Either[HSException, R]] = {
     if (response.entity.contentType.mediaType == MediaTypes.`application/json`) {
-      Unmarshal(response.entity).to[HSException](JacksonSupport.unmarshaller, ec, mat)
+      Unmarshal(response.entity)
+        .to[HSException](JacksonSupport.unmarshaller, ec, mat)
         .map(e => Left(e))(if (ec eq null) mat.executionContext else ec)
     } else {
-      Unmarshal(response.entity).to[String]
-        .map(errMsg => Left(new HSException(response.status.intValue(), errMsg)))(if (ec eq null) mat.executionContext else ec)
+      Unmarshal(response.entity)
+        .to[String]
+        .map(errMsg => Left(new HSException(response.status.intValue(), errMsg)))(
+          if (ec eq null) mat.executionContext else ec)
     }
   }
 
   def queryToPageParams(query: Uri.Query): PageInput = {
     val params = queryToMap(query)
-    val page = params.get("page").flatMap(page => Utils.parseInt(page)).getOrElse(1)
-    val size = params.get("size").flatMap(size => Utils.parseInt(size)).getOrElse(10)
+    val page =
+      params.get("page").flatMap(page => Utils.parseInt(page)).getOrElse(1)
+    val size =
+      params.get("size").flatMap(size => Utils.parseInt(size)).getOrElse(10)
     PageInput(page, size, params - "page" - "size")
   }
 
-  def queryToMap(request: HttpRequest): Map[String, String] = queryToMap(request.uri.query())
+  def queryToMap(request: HttpRequest): Map[String, String] =
+    queryToMap(request.uri.query())
 
   def queryToMap(query: Uri.Query): Map[String, String] = query.toMap
 
@@ -187,10 +204,14 @@ object HttpUtils extends StrictLogging {
   }
 
   private def tupleKeyToContentType(charset: String, tupleKey: (String, String)) = {
-    val mediaType = MediaTypes.getForKey(tupleKey).getOrElse(MediaTypes.`application/octet-stream`)
+    val mediaType = MediaTypes
+      .getForKey(tupleKey)
+      .getOrElse(MediaTypes.`application/octet-stream`)
     val httpContentType: ContentType = mediaType match {
       case woc: MediaType.WithOpenCharset =>
-        val httpCharset = HttpCharsets.getForKeyCaseInsensitive(charset).getOrElse(HttpCharsets.`UTF-8`)
+        val httpCharset = HttpCharsets
+          .getForKeyCaseInsensitive(charset)
+          .getOrElse(HttpCharsets.`UTF-8`)
         woc.withCharset(httpCharset)
       case mt: MediaType.Binary           => ContentType(mt)
       case mt: MediaType.WithFixedCharset => ContentType(mt)
@@ -206,9 +227,12 @@ object HttpUtils extends StrictLogging {
   def cachedHostConnectionPool(url: String)(implicit mat: ActorMaterializer): HttpSourceQueue = {
     val uri = Uri(url)
     uri.scheme match {
-      case "http"  => cachedHostConnectionPool(uri.authority.host.address(), uri.authority.port)
-      case "https" => cachedHostConnectionPoolHttps(uri.authority.host.address(), uri.authority.port)
-      case _       => throw new IllegalArgumentException(s"URL: $url 不是有效的 http 或 https 协议")
+      case "http" =>
+        cachedHostConnectionPool(uri.authority.host.address(), uri.authority.port)
+      case "https" =>
+        cachedHostConnectionPoolHttps(uri.authority.host.address(), uri.authority.port)
+      case _ =>
+        throw new IllegalArgumentException(s"URL: $url 不是有效的 http 或 https 协议")
     }
   }
 
@@ -222,8 +246,10 @@ object HttpUtils extends StrictLogging {
    */
   def cachedHostConnectionPool(host: String, port: Int = 80)(implicit mat: ActorMaterializer): HttpSourceQueue = {
     implicit val system = mat.system
-    val poolClientFlow = Http().cachedHostConnectionPool[Promise[HttpResponse]](host, port)
-    Source.queue[(HttpRequest, Promise[HttpResponse])](512, OverflowStrategy.dropNew)
+    val poolClientFlow =
+      Http().cachedHostConnectionPool[Promise[HttpResponse]](host, port)
+    Source
+      .queue[(HttpRequest, Promise[HttpResponse])](512, OverflowStrategy.dropNew)
       .via(poolClientFlow)
       .toMat(Sink.foreach({
         case ((Success(resp), p)) => p.success(resp)
@@ -242,8 +268,10 @@ object HttpUtils extends StrictLogging {
    */
   def cachedHostConnectionPoolHttps(host: String, port: Int = 80)(implicit mat: ActorMaterializer): HttpSourceQueue = {
     implicit val system = mat.system
-    val poolClientFlow = Http().cachedHostConnectionPoolHttps[Promise[HttpResponse]](host, port)
-    Source.queue[(HttpRequest, Promise[HttpResponse])](512, OverflowStrategy.dropNew)
+    val poolClientFlow =
+      Http().cachedHostConnectionPoolHttps[Promise[HttpResponse]](host, port)
+    Source
+      .queue[(HttpRequest, Promise[HttpResponse])](512, OverflowStrategy.dropNew)
       .via(poolClientFlow)
       .toMat(Sink.foreach({
         case ((Success(resp), p)) => p.success(resp)
@@ -268,12 +296,14 @@ object HttpUtils extends StrictLogging {
       echoStr: String = Utils.randomString(12)): HttpRequest = {
     val timestamp = Instant.now().getEpochSecond.toString
     val echoStr = Utils.randomString(8)
-    val accessToken = DigestUtils.sha256Hex(appId + appKey + echoStr + timestamp)
+    val accessToken =
+      DigestUtils.sha256Hex(appId + appKey + echoStr + timestamp)
     val headers = List(
       RawHeader(HttpConstants.HS_APP_ID, appId),
       RawHeader(HttpConstants.HS_TIMESTAMP, timestamp),
       RawHeader(HttpConstants.HS_ECHO_STR, echoStr),
-      RawHeader(HttpConstants.HS_ACCESS_TOKEN, accessToken))
+      RawHeader(HttpConstants.HS_ACCESS_TOKEN, accessToken)
+    )
     request.withHeaders(headers)
   }
 
@@ -301,9 +331,11 @@ object HttpUtils extends StrictLogging {
       entity = data match {
         case null                    => HttpEntity.Empty
         case entity: UniversalEntity => entity
-        case _                       => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _ =>
+          HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       },
-      protocol = protocol)
+      protocol = protocol
+    )
     singleRequest(request)
   }
 
@@ -325,13 +357,17 @@ object HttpUtils extends StrictLogging {
    * @param httpSourceQueue 使用了CachedHostConnectionPool的 HTTP 队列
    * @return Future[HttpResponse]
    */
-  def hostRequest(request: HttpRequest)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
+  def hostRequest(
+      request: HttpRequest)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
     val responsePromise = Promise[HttpResponse]()
     httpSourceQueue.offer(request -> responsePromise).flatMap {
-      case QueueOfferResult.Enqueued    => responsePromise.future
-      case QueueOfferResult.Dropped     => Future.failed(new RuntimeException("Queue overflowed. Try again later."))
+      case QueueOfferResult.Enqueued => responsePromise.future
+      case QueueOfferResult.Dropped =>
+        Future.failed(new RuntimeException("Queue overflowed. Try again later."))
       case QueueOfferResult.Failure(ex) => Future.failed(ex)
-      case QueueOfferResult.QueueClosed => Future.failed(new RuntimeException("Queue was closed (pool shut down) while running the request. Try again later."))
+      case QueueOfferResult.QueueClosed =>
+        Future.failed(
+          new RuntimeException("Queue was closed (pool shut down) while running the request. Try again later."))
     }
   }
 
@@ -340,11 +376,14 @@ object HttpUtils extends StrictLogging {
       uri: Uri,
       params: Seq[(String, String)] = Nil,
       data: AnyRef = null,
-      headers: immutable.Seq[HttpHeader] = Nil)(implicit httpSourceQueue: HttpSourceQueue, ec: ExecutionContext): Future[HttpResponse] = {
+      headers: immutable.Seq[HttpHeader] = Nil)(
+      implicit httpSourceQueue: HttpSourceQueue,
+      ec: ExecutionContext): Future[HttpResponse] = {
     val entity = if (data != null) {
       data match {
         case entity: MessageEntity => entity
-        case _                     => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _ =>
+          HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       }
     } else {
       HttpEntity.Empty
@@ -361,22 +400,23 @@ object HttpUtils extends StrictLogging {
     val entity = if (data != null) {
       data match {
         case entity: MessageEntity => entity
-        case _                     => HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
+        case _ =>
+          HttpEntity(ContentTypes.`application/json`, Jackson.defaultObjectMapper.writeValueAsString(data))
       }
     } else {
       HttpEntity.Empty
     }
 
-    HttpRequest(
-      method,
-      uri.withQuery(Uri.Query(params.map { case (key, value) => key -> value.toString }: _*)),
-      headers,
-      entity)
+    HttpRequest(method, uri.withQuery(Uri.Query(params.map {
+      case (key, value) => key -> value.toString
+    }: _*)), headers, entity)
   }
 
-  def toStrictEntity(response: HttpResponse)(implicit mat: Materializer): HttpEntity.Strict = toStrictEntity(response.entity)
+  def toStrictEntity(response: HttpResponse)(implicit mat: Materializer): HttpEntity.Strict =
+    toStrictEntity(response.entity)
 
-  def toByteString(response: HttpResponse)(implicit mat: ActorMaterializer): Future[ByteString] = Unmarshal(response.entity).to[ByteString]
+  def toByteString(response: HttpResponse)(implicit mat: ActorMaterializer): Future[ByteString] =
+    Unmarshal(response.entity).to[ByteString]
 
   def toStrictEntity(responseEntity: ResponseEntity)(implicit mat: Materializer): HttpEntity.Strict = {
     import scala.concurrent.duration._

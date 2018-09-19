@@ -22,6 +22,7 @@ import com.github.swagger.akka.SwaggerHttpService
 import com.github.swagger.akka.model.{Contact, Info, License}
 import helloscala.common.Configuration
 import helloscala.common.util.ReflectUtils
+import io.swagger.models.Scheme
 
 /**
  * Swagger Route，配置使用Swagger自动生成文档。只包含swagger.json或swagger.yaml配置文件（/api-docs/swagger.json）
@@ -29,55 +30,80 @@ import helloscala.common.util.ReflectUtils
  *
  * Created by yangbajing(yangbajing@gmail.com) on 2017-04-10.
  */
-class SwaggerHttpDoc private (
-    configuration: Configuration,
-    _apiTypes: Traversable[Class[_]],
-    basePath: String) extends SwaggerHttpService {
+class SwaggerHttpDoc private (configuration: Configuration, _apiTypes: Traversable[Class[_]], basePath: String)
+    extends SwaggerHttpService {
 
   require(configuration.underlying.hasPath(s"$basePath.scan-packages"), s"config配置路径：[$basePath.scan-packages] 不存在")
 
-  override val apiDocsPath: String = configuration.get[Option[String]](s"$basePath.api-docs-path").getOrElse(super.apiDocsPath)
+  override val apiDocsPath: String = configuration
+    .get[Option[String]](s"$basePath.api-docs-path")
+    .getOrElse(super.apiDocsPath)
 
   // 指定Api类型，如：XXXRoutes
   override val apiClasses: Set[Class[_]] = {
-    val cls = configuration.get[Seq[String]](s"$basePath.scan-packages")
+    val cls = configuration
+      .get[Seq[String]](s"$basePath.scan-packages")
       .flatMap(pkg => ReflectUtils.listClassNameFromPackage(pkg))
       .map(cn => Class.forName(cn))
       .toSet
     cls ++ _apiTypes
   }
 
+  override val schemes: List[Scheme] = configuration
+    .get[Seq[String]](s"$basePath.schemas")
+    .map(Scheme.forValue)
+    .toList
+
   // Api服务访问地址（非Api文档访问地址）
   override val host: String =
-    configuration.get[Option[String]](s"$basePath.host")
+    configuration
+      .get[Option[String]](s"$basePath.host")
       .getOrElse("%s:%d".format(configuration.get[String]("server.host"), configuration.get[Int]("server.port")))
 
   // Api信息
   override val info: Info = {
     val contact =
       if (!configuration.has(s"$basePath.info.contact")) None
-      else Some(Contact(
-        configuration.getString(s"$basePath.info.contact.name"),
-        configuration.getString(s"$basePath.info.contact.url"),
-        configuration.getString(s"$basePath.info.contact.email")))
+      else
+        Some(
+          Contact(
+            configuration.getString(s"$basePath.info.contact.name"),
+            configuration.getString(s"$basePath.info.contact.url"),
+            configuration.getString(s"$basePath.info.contact.email")
+          ))
     val license =
       if (!configuration.has(s"$basePath.info.license")) None
-      else Some(License(
-        configuration.getString(s"$basePath.info.license.name"),
-        configuration.getString(s"$basePath.info.license.url")))
+      else
+        Some(
+          License(configuration.getString(s"$basePath.info.license.name"),
+                  configuration.getString(s"$basePath.info.license.url")))
 
     Info(
-      configuration.get[Option[String]](s"$basePath.info.version").getOrElse(""),
-      configuration.get[Option[String]](s"$basePath.info.description").getOrElse(""),
+      configuration
+        .get[Option[String]](s"$basePath.info.version")
+        .getOrElse(""),
+      configuration
+        .get[Option[String]](s"$basePath.info.description")
+        .getOrElse(""),
       configuration.get[Option[String]](s"$basePath.info.title").getOrElse(""),
-      configuration.get[Option[String]](s"$basePath.info.termsOfService").getOrElse(""),
+      configuration
+        .get[Option[String]](s"$basePath.info.termsOfService")
+        .getOrElse(""),
       contact,
-      license)
+      license
+    )
   }
 
   val swaggerUiRoute: Route = {
-    val s = scala.io.Source.fromInputStream(Thread.currentThread().getContextClassLoader.getResourceAsStream("hs-swagger-ui/index.html"))
-    val indexHtml = s.getLines().mkString("\n").replace("/api-docs/swagger.json", s"/$apiDocsPath/swagger.json")
+    val s = scala.io.Source.fromInputStream(
+      Thread
+        .currentThread()
+        .getContextClassLoader
+        .getResourceAsStream("hs-swagger-ui/index.html"))
+    val indexHtml = s
+      .getLines()
+      .mkString("\n")
+      .replace("/api-docs/swagger.json", s"/$apiDocsPath/swagger.json")
 
     try {
       pathPrefix(apiDocsPath) {

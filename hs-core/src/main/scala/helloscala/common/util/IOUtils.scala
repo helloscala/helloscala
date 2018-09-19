@@ -39,9 +39,9 @@ class IOUtils {
     Files.move(source, target, options: _*)
   }
 
-  def readLine(
-      bytes: Source[ByteString, Any],
-      charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[String] = {
+  def readLine(bytes: Source[ByteString, Any], charset: Charset = StandardCharsets.UTF_8)(
+      implicit materializer: Materializer,
+      readTimeout: FiniteDuration = 5.seconds): Vector[String] = {
     val in = bytes.runWith(StreamConverters.asInputStream(readTimeout))
     try {
       scala.io.Source.fromInputStream(in, charset.name()).getLines().toVector
@@ -50,9 +50,9 @@ class IOUtils {
     }
   }
 
-  def readAllContentsFromZipBySource(
-      bytes: Source[ByteString, Any],
-      charset: Charset = StandardCharsets.UTF_8)(implicit materializer: Materializer, readTimeout: FiniteDuration = 5.seconds): Vector[(String, String)] = {
+  def readAllContentsFromZipBySource(bytes: Source[ByteString, Any], charset: Charset = StandardCharsets.UTF_8)(
+      implicit materializer: Materializer,
+      readTimeout: FiniteDuration = 5.seconds): Vector[(String, String)] = {
     val in = bytes.runWith(StreamConverters.asInputStream(readTimeout))
     readAllContentsFromZip(in, charset)
   }
@@ -90,7 +90,8 @@ class IOUtils {
   }
 
   def readLineFromResources(path: String): List[String] = {
-    val in = Thread.currentThread().getContextClassLoader.getResourceAsStream(path)
+    val in =
+      Thread.currentThread().getContextClassLoader.getResourceAsStream(path)
     require(in != null, s"resources资源：$path 不存在")
     val s = scala.io.Source.fromInputStream(in)
     try {
@@ -102,6 +103,4 @@ class IOUtils {
 
 }
 
-object IOUtils extends IOUtils {
-
-}
+object IOUtils extends IOUtils {}

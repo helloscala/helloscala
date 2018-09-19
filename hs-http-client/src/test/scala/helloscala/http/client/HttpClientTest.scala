@@ -21,11 +21,14 @@ class HttpClientTest extends HelloscalaSpec with AkkaSpec {
       //      HttpUtils.dump(response)
 
       val url = "https://edoc.xycq.hualongdata.com/api/setting/list"
-      val client = new OkHttpClient().newBuilder().hostnameVerifier(new HostnameVerifier() {
-        override def verify(hostname: String, session: SSLSession): Boolean = { //强行返回true 即验证成功
-          true
-        }
-      }).build()
+      val client = new OkHttpClient()
+        .newBuilder()
+        .hostnameVerifier(new HostnameVerifier() {
+          override def verify(hostname: String, session: SSLSession): Boolean = { //强行返回true 即验证成功
+            true
+          }
+        })
+        .build()
       val request = new Request.Builder().url(url).build()
       val response = client.newCall(request).execute()
       val str = response.body().string()

@@ -24,8 +24,8 @@ import akka.http.scaladsl.server.RejectionWithOptionalCause
  * @param cause 可选的异常
  */
 case class ForbiddenRejection(message: String, cause: Option[Throwable] = None)
-  extends akka.http.javadsl.server.AuthorizationFailedRejection
-  with RejectionWithOptionalCause
+    extends akka.http.javadsl.server.AuthorizationFailedRejection
+    with RejectionWithOptionalCause
 
 /**
  * 会话认证拒绝，401
@@ -33,6 +33,5 @@ case class ForbiddenRejection(message: String, cause: Option[Throwable] = None)
  * @param cause 可选的异常
  */
 case class SessionRejection(message: String, cause: Option[Throwable] = None)
-  extends akka.http.javadsl.server.AuthorizationFailedRejection
-  with RejectionWithOptionalCause
-
+    extends akka.http.javadsl.server.AuthorizationFailedRejection
+    with RejectionWithOptionalCause

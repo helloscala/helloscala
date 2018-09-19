@@ -7,7 +7,7 @@ object Dependencies {
 
   val _scalatest = "org.scalatest" %% "scalatest" % "3.0.5"
 
-  private val versionAkka = "2.5.14"
+  private val versionAkka = "2.5.16"
   lazy val _akka = Seq(
     "com.typesafe.akka" %% "akka-actor" % versionAkka,
     "com.typesafe.akka" %% "akka-slf4j" % versionAkka,
@@ -15,6 +15,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-stream-testkit" % versionAkka % Test
   ).map(_.exclude("org.scala-lang.modules", s"scala-java8-compat").cross(CrossVersion.binary)) :+
     ("org.scala-lang.modules" %% "scala-java8-compat" % "0.8.0").exclude("org.scala-lang", "scala-library")
+
   val _akkaTest = Seq(
     "com.typesafe.akka" %% "akka-stream-testkit" % versionAkka
   )
@@ -22,8 +23,12 @@ object Dependencies {
   val _akkaStreamKafka = "com.typesafe.akka" %% "akka-stream-kafka" % "0.20"
 
   private val versionAlpakka = "0.20"
+
   val _alpakkaCassandra = ("com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % versionAlpakka)
-    .excludeAll(ExclusionRule("com.typesafe.akka"), ExclusionRule("com.datastax.cassandra"), ExclusionRule("io.netty"), ExclusionRule("com.google.guava"))
+    .excludeAll(ExclusionRule("com.typesafe.akka"),
+                ExclusionRule("com.datastax.cassandra"),
+                ExclusionRule("io.netty"),
+                ExclusionRule("com.google.guava"))
 
   val _alpakkaFile = ("com.lightbend.akka" %% "akka-stream-alpakka-file" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"))
@@ -40,21 +45,27 @@ object Dependencies {
   val _alpakkaSlick = ("com.lightbend.akka" %% "akka-stream-alpakka-slick" % versionAlpakka)
     .excludeAll(ExclusionRule("com.typesafe.akka"))
 
-  private val versionAkkaHttp = "10.1.3"
+  private val versionAkkaHttp = "10.1.5"
   lazy val _akkaHttpCore = ("com.typesafe.akka" %% "akka-http-core" % versionAkkaHttp)
-    .exclude("com.typesafe.akka", s"akka-actor").cross(CrossVersion.binary)
-    .exclude("com.typesafe.akka", s"akka-stream").cross(CrossVersion.binary)
+    .exclude("com.typesafe.akka", s"akka-actor")
+    .cross(CrossVersion.binary)
+    .exclude("com.typesafe.akka", s"akka-stream")
+    .cross(CrossVersion.binary)
   lazy val _akkaHttpTest = ("com.typesafe.akka" %% "akka-http-testkit" % versionAkkaHttp)
-    .exclude("com.typesafe.akka", s"akka-stream").cross(CrossVersion.binary)
+    .exclude("com.typesafe.akka", s"akka-stream")
+    .cross(CrossVersion.binary)
   lazy val _akkaHttp = Seq(
     "com.typesafe.akka" %% "akka-http" % versionAkkaHttp,
     _akkaHttpTest % Test,
     "ch.megard" %% "akka-http-cors" % "0.3.0"
-  ).map(_
-    .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
-    .exclude("com.typesafe.akka", "akka-stream").cross(CrossVersion.binary))
+  ).map(
+    _.exclude("com.typesafe.akka", "akka-actor")
+      .cross(CrossVersion.binary)
+      .exclude("com.typesafe.akka", "akka-stream")
+      .cross(CrossVersion.binary))
 
   val swaggerVersion = "1.5.20"
+
   val _swagger = Seq(
     "io.swagger" % "swagger-core" % swaggerVersion,
     //    "io.swagger" % "swagger-annotations" % swaggerVersion,
@@ -73,35 +84,46 @@ object Dependencies {
   val _scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
 
   private val versionJackson = "2.9.6"
+
   val _jackson = Seq(
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % versionJackson,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % versionJackson,
     "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % versionJackson,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % versionJackson,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % versionJackson)
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % versionJackson
+  )
 
   lazy val _redis = ("net.debasishg" %% "redisclient" % "3.7")
-    .exclude("com.typesafe.akka", "akka-actor").cross(CrossVersion.binary)
+    .exclude("com.typesafe.akka", "akka-actor")
+    .cross(CrossVersion.binary)
 
   private val versionSlick = "3.2.3"
+
   val _slick = Seq(
     "com.typesafe.slick" %% "slick" % versionSlick,
     "com.typesafe.slick" %% "slick-hikaricp" % versionSlick
   )
 
   private val versionSlickPg = "0.16.3"
+
   val _slickPg = Seq(
     "com.github.tminglei" %% "slick-pg" % versionSlickPg
   )
 
   private val versionElastic4s = "5.4.15"
+
   val _elastic4s = Seq(
     "com.sksamuel.elastic4s" %% "elastic4s-tcp" % versionElastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-xpack-security" % versionElastic4s
-  ).map(_.exclude("log4j", "log4j")
-    .excludeAll(ExclusionRule("io.netty"), ExclusionRule("org.apache.lucene"), ExclusionRule("org.elasticsearch"), ExclusionRule("org.elasticsearch.client")))
+  ).map(
+    _.exclude("log4j", "log4j")
+      .excludeAll(ExclusionRule("io.netty"),
+                  ExclusionRule("org.apache.lucene"),
+                  ExclusionRule("org.elasticsearch"),
+                  ExclusionRule("org.elasticsearch.client")))
 
   private val versionElasticsearch = "5.4.3"
+
   val _elasticsearch = Seq(
     ("org.elasticsearch" % "elasticsearch" % versionElasticsearch)
       .excludeAll(
@@ -112,16 +134,16 @@ object Dependencies {
       ),
     "org.elasticsearch.client" % "transport" % versionElasticsearch,
     "org.elasticsearch.client" % "x-pack-transport" % versionElasticsearch
-  ).map(_
-    .excludeAll(ExclusionRule("com.google.guava"))
-    .exclude("io.netty", "netty-buffer")
-    .exclude("io.netty", "netty-codec")
-    .exclude("io.netty", "netty-codec-http")
-    .exclude("io.netty", "netty-common")
-    .exclude("io.netty", "netty-handler")
-    .exclude("io.netty", "netty-resolver")
-    .exclude("io.netty", "netty-transport")
-    .exclude("io.netty", "netty-all"))
+  ).map(
+    _.excludeAll(ExclusionRule("com.google.guava"))
+      .exclude("io.netty", "netty-buffer")
+      .exclude("io.netty", "netty-codec")
+      .exclude("io.netty", "netty-codec-http")
+      .exclude("io.netty", "netty-common")
+      .exclude("io.netty", "netty-handler")
+      .exclude("io.netty", "netty-resolver")
+      .exclude("io.netty", "netty-transport")
+      .exclude("io.netty", "netty-all"))
 
   private val versionGuice = "4.1.0"
   val _guice = ("com.google.inject" % "guice" % versionGuice).exclude("com.google.guava", "guava")
@@ -134,6 +156,7 @@ object Dependencies {
   val _nettyCodecHttp = "io.netty" % "netty-codec-http" % versionNetty
 
   private val versionCassandra = "3.3.2"
+
   val _cassandraDriver = Seq(
     "com.datastax.cassandra" % "cassandra-driver-core" % versionCassandra,
     "com.datastax.cassandra" % "cassandra-driver-extras" % "3.3.1"
@@ -152,6 +175,7 @@ object Dependencies {
   val _bouncycastleProvider = "org.bouncycastle" % "bcprov-jdk15on" % "1.59"
 
   private val versionPoi = "3.17"
+
   val _poi = Seq(
     "org.apache.poi" % "poi" % versionPoi,
     "org.apache.poi" % "poi-scratchpad" % versionPoi,
@@ -165,6 +189,7 @@ object Dependencies {
   val _mysql = "mysql" % "mysql-connector-java" % "6.0.6"
 
   private val versionTika = "1.18"
+
   val _tika = Seq(
     ("org.apache.tika" % "tika-parsers" % versionTika)
       .excludeAll(ExclusionRule("org.apache.poi")),
@@ -184,4 +209,3 @@ object Dependencies {
 
   val _log4jToSlf4j = "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.11.1"
 }
-

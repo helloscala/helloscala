@@ -18,18 +18,11 @@ package helloscala.http.session
 
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ConfigValueFactory, ConfigFactory, Config}
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 
-case class CookieConfig(
-    name: String,
-    domain: Option[String],
-    path: Option[String],
-    secure: Boolean,
-    httpOnly: Boolean)
+case class CookieConfig(name: String, domain: Option[String], path: Option[String], secure: Boolean, httpOnly: Boolean)
 
-case class HeaderConfig(
-    sendToClientHeaderName: String,
-    getFromClientHeaderName: String)
+case class HeaderConfig(sendToClientHeaderName: String, getFromClientHeaderName: String)
 
 case class SessionConfig(
     /**
@@ -67,15 +60,23 @@ case class SessionConfig(
 }
 
 object SessionConfig {
-  private implicit class PimpedConfig(config: Config) {
+  implicit private class PimpedConfig(config: Config) {
     val noneValue = "none"
 
-    def getOptionalString(path: String) = if (config.getAnyRef(path) == noneValue) None else
-      Some(config.getString(path))
-    def getOptionalLong(path: String) = if (config.getAnyRef(path) == noneValue) None else
-      Some(config.getLong(path))
-    def getOptionalDurationSeconds(path: String) = if (config.getAnyRef(path) == noneValue) None else
-      Some(config.getDuration(path, TimeUnit.SECONDS))
+    def getOptionalString(path: String) =
+      if (config.getAnyRef(path) == noneValue) None
+      else
+        Some(config.getString(path))
+
+    def getOptionalLong(path: String) =
+      if (config.getAnyRef(path) == noneValue) None
+      else
+        Some(config.getLong(path))
+
+    def getOptionalDurationSeconds(path: String) =
+      if (config.getAnyRef(path) == noneValue) None
+      else
+        Some(config.getDuration(path, TimeUnit.SECONDS))
   }
 
   def fromConfig(config: Config = ConfigFactory.load()): SessionConfig = {
@@ -90,10 +91,12 @@ object SessionConfig {
         domain = scopedConfig.getOptionalString("cookie.domain"),
         path = scopedConfig.getOptionalString("cookie.path"),
         secure = scopedConfig.getBoolean("cookie.secure"),
-        httpOnly = scopedConfig.getBoolean("cookie.http-only")),
+        httpOnly = scopedConfig.getBoolean("cookie.http-only")
+      ),
       sessionHeaderConfig = HeaderConfig(
         sendToClientHeaderName = scopedConfig.getString("header.send-to-client-name"),
-        getFromClientHeaderName = scopedConfig.getString("header.get-from-client-name")),
+        getFromClientHeaderName = scopedConfig.getString("header.get-from-client-name")
+      ),
       sessionMaxAgeSeconds = scopedConfig.getOptionalDurationSeconds("max-age"),
       sessionEncryptData = scopedConfig.getBoolean("encrypt-data"),
       csrfCookieConfig = CookieConfig(
@@ -101,26 +104,34 @@ object SessionConfig {
         domain = csrfConfig.getOptionalString("cookie.domain"),
         path = csrfConfig.getOptionalString("cookie.path"),
         secure = csrfConfig.getBoolean("cookie.secure"),
-        httpOnly = csrfConfig.getBoolean("cookie.http-only")),
+        httpOnly = csrfConfig.getBoolean("cookie.http-only")
+      ),
       csrfSubmittedName = csrfConfig.getString("submitted-name"),
       refreshTokenCookieConfig = CookieConfig(
         name = refreshTokenConfig.getString("cookie.name"),
         domain = refreshTokenConfig.getOptionalString("cookie.domain"),
         path = refreshTokenConfig.getOptionalString("cookie.path"),
         secure = refreshTokenConfig.getBoolean("cookie.secure"),
-        httpOnly = refreshTokenConfig.getBoolean("cookie.http-only")),
+        httpOnly = refreshTokenConfig.getBoolean("cookie.http-only")
+      ),
       refreshTokenHeaderConfig = HeaderConfig(
         sendToClientHeaderName = refreshTokenConfig.getString("header.send-to-client-name"),
-        getFromClientHeaderName = refreshTokenConfig.getString("header.get-from-client-name")),
+        getFromClientHeaderName = refreshTokenConfig.getString("header.get-from-client-name")
+      ),
       refreshTokenMaxAgeSeconds = refreshTokenConfig.getDuration("max-age", TimeUnit.SECONDS),
-      removeUsedRefreshTokenAfter = refreshTokenConfig.getDuration("remove-used-token-after", TimeUnit.SECONDS))
+      removeUsedRefreshTokenAfter = refreshTokenConfig.getDuration("remove-used-token-after", TimeUnit.SECONDS)
+    )
   }
 
   /**
    * Creates a default configuration using the given secret.
    */
-  def default(serverSecret: String): SessionConfig = fromConfig(ConfigFactory.load()
-    .withValue("akka.http.session.server-secret", ConfigValueFactory.fromAnyRef(serverSecret)))
+  def default(serverSecret: String): SessionConfig =
+    fromConfig(
+      ConfigFactory
+        .load()
+        .withValue("akka.http.session.server-secret", ConfigValueFactory.fromAnyRef(serverSecret)))
 
-  def defaultConfig(serverSecret: String): SessionConfig = default(serverSecret) // required for javadsl directives, because default is a keyword
+  def defaultConfig(serverSecret: String): SessionConfig =
+    default(serverSecret) // required for javadsl directives, because default is a keyword
 }

@@ -29,6 +29,7 @@ import helloscala.http.jackson.JacksonSupport
 import scala.concurrent.duration._
 
 trait CacheRedisDirectives {
+
   def cacheRedisOnParameters(
       redisClientPool: RedisClientPool,
       expiry: FiniteDuration,
@@ -73,7 +74,8 @@ object CacheRedisDirectives extends StrictLogging {
     extract { ctx =>
       val query = ctx.request.uri.query()
       val keys = query.map(_._1).sorted
-      val tmpKey = ctx.request.uri.path.toString() + ':' + keys.flatMap(key => query.get(key)).mkString
+      val tmpKey = ctx.request.uri.path
+        .toString() + ':' + keys.flatMap(key => query.get(key)).mkString
       val cacheKey = if (isEncodeCacheKey) {
         val k = DigestUtils.sha1Hex(tmpKey)
         logger.trace(s"uri: ${ctx.request.uri}, originCacheKey: $tmpKey, encodeCacheKey: $k")
@@ -84,7 +86,8 @@ object CacheRedisDirectives extends StrictLogging {
       }
 
       if (StringUtils.isNoneBlank(cacheKey)) {
-        val maybe = redisClientPool.withClient(client => client.get[String](cacheKey))
+        val maybe =
+          redisClientPool.withClient(client => client.get[String](cacheKey))
         Some(cacheKey) -> maybe
       } else {
         None -> None
@@ -94,7 +97,8 @@ object CacheRedisDirectives extends StrictLogging {
         extractRequestContext
           .flatMap { ctx =>
             logger.debug(s"(${ctx.request.uri})命中缓存Key：$cacheKey, 值：$value")
-            val future = Marshal(Jackson.defaultObjectMapper.readTree(value)).to[ResponseEntity](JacksonSupport.marshaller, ctx.executionContext)
+            val future = Marshal(Jackson.defaultObjectMapper.readTree(value))
+              .to[ResponseEntity](JacksonSupport.marshaller, ctx.executionContext)
             // TODO 若Cache中没找到数据怎么办？
             onSuccess(future)
               .flatMap { v =>

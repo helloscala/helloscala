@@ -9,17 +9,11 @@ class ReflectUtilsTest extends WordSpec {
 
   "ReflectUtilsTest" should {
 
-    "getUniverseType" in {
+    "getUniverseType" in {}
 
-    }
+    "listClassNameFromPackage" in {}
 
-    "listClassNameFromPackage" in {
-
-    }
-
-    "listPathFromPackage" in {
-
-    }
+    "listPathFromPackage" in {}
 
   }
 }

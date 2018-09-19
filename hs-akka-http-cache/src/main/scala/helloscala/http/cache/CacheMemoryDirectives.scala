@@ -16,9 +16,7 @@
 
 package helloscala.http.cache
 
-trait CacheMemoryDirectives {
-
-}
+trait CacheMemoryDirectives {}
 
 object CacheMemoryDirectives {
 

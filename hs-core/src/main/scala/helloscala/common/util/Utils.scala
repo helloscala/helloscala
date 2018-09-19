@@ -129,7 +129,11 @@ class Utils extends Serializable {
     val filterNoneBlank: String => Boolean = s => StringUtils.isNoneBlank(s)
     val trim: String => String = s => s.trim
     val trans: Path => java.util.stream.Stream[String] = path => Files.readAllLines(path).stream()
-    Files.list(dir).flatMap(trans.asJava).map[String](trim.asJava).filter(filterNoneBlank.asJava)
+    Files
+      .list(dir)
+      .flatMap(trans.asJava)
+      .map[String](trim.asJava)
+      .filter(filterNoneBlank.asJava)
   }
 
   def randomBytes(size: Int): Array[Byte] = {
@@ -167,12 +171,13 @@ class Utils extends Serializable {
     case o                  => o.asInstanceOf[Object]
   }
 
-  def boxedSQL(v: Any): Object = try {
-    boxed(v)
-  } catch {
-    case _: Throwable =>
-      sqlBoxed(v)
-  }
+  def boxedSQL(v: Any): Object =
+    try {
+      boxed(v)
+    } catch {
+      case _: Throwable =>
+        sqlBoxed(v)
+    }
 
   def isEmail(account: String): Boolean = {
     // TODO
@@ -180,20 +185,21 @@ class Utils extends Serializable {
   }
 
   @inline
-  def option(s: String): Option[String] = Some(s).filter(str => StringUtils.isNoneBlank(str))
+  def option(s: String): Option[String] =
+    Some(s).filter(str => StringUtils.isNoneBlank(str))
 
   @inline
   def option[V](v: V): Option[V] = Option(v)
 
   def propertiesToMap(props: Properties): Map[String, String] = {
     import scala.collection.JavaConverters._
-    props.stringPropertyNames().asScala
+    props
+      .stringPropertyNames()
+      .asScala
       .map(name => name -> props.getProperty(name))
       .toMap
   }
 
 }
 
-object Utils extends Utils {
-
-}
+object Utils extends Utils {}

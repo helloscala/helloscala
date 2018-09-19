@@ -30,6 +30,7 @@ import io.swagger.annotations._
 case class Dog(breed: String)
 
 class NestedService(system: ActorSystem) { self =>
+
   val swaggerService = new SwaggerHttpService {
     override val apiClasses: Set[Class[_]] = Set(Dogs.getClass)
     override val host = "some.domain.com"
@@ -42,7 +43,8 @@ class NestedService(system: ActorSystem) { self =>
       title = "Test API Service",
       termsOfService = "Lenient",
       contact = Some(Contact("Lassie", "http://lassie.com", "lassie@tvland.com")),
-      license = Some(License("Apache", "http://license.apache.com")))
+      license = Some(License("Apache", "http://license.apache.com"))
+    )
 
     implicit def actorRefFactory: ActorRefFactory = system
   }
@@ -53,27 +55,20 @@ class NestedService(system: ActorSystem) { self =>
 
     implicit def actorRefFactory: ActorRefFactory = self.system
 
-    @ApiOperation(
-      value = "List all of the dogs",
-      notes = "Dogs are identified by unique strings",
-      response = classOf[ListReply[Dog]],
-      httpMethod = "GET",
-      nickname = "getDogs")
-    @ApiResponses(Array(
-      new ApiResponse(
-        code = 200,
-        message = "OK"),
-      new ApiResponse(code = 404, message = "Dog not found"),
-      new ApiResponse(code = 500, message = "Internal Server Error")))
+    @ApiOperation(value = "List all of the dogs",
+                  notes = "Dogs are identified by unique strings",
+                  response = classOf[ListReply[Dog]],
+                  httpMethod = "GET",
+                  nickname = "getDogs")
+    @ApiResponses(
+      Array(new ApiResponse(code = 200, message = "OK"),
+            new ApiResponse(code = 404, message = "Dog not found"),
+            new ApiResponse(code = 500, message = "Internal Server Error")))
     def getDogs = path("dogs") {
       complete("dogs")
     }
 
-    @ApiOperation(
-      value = "Options for dogs",
-      notes = "dog notes",
-      response = classOf[Void],
-      httpMethod = "OPTIONS")
+    @ApiOperation(value = "Options for dogs", notes = "dog notes", response = classOf[Void], httpMethod = "OPTIONS")
     @ApiResponses(Array(new ApiResponse(code = 200, message = "OK")))
     def optionsRoute: Route = (path("dogs") & options) {
       complete(HttpResponse(OK, entity = HttpEntity.empty(`application/json`)))

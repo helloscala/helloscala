@@ -13,7 +13,7 @@ import scala.concurrent.duration._
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-07.
  */
 class AlpakkaCassandraTest extends CassandraSpec {
-  override implicit val session: Session = Cluster.builder.addContactPoint("127.0.0.1").withPort(9042).build.connect()
+  implicit override val session: Session = Cluster.builder.addContactPoint("127.0.0.1").withPort(9042).build.connect()
 
   "AlpakkaCassandraTest" must {
     "INSERST" in {

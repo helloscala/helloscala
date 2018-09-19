@@ -28,8 +28,9 @@ trait AbstractSwaggerRoute {
 
   val swagger = SwaggerHttpDoc(configuration)
 
-  protected def swaggerRoute: Route = cors()(
-    swagger.routes ~
-      swagger.swaggerUiRoute)
+  protected def swaggerRoute: Route =
+    cors()(
+      swagger.routes ~
+        swagger.swaggerUiRoute)
 
 }

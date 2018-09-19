@@ -11,6 +11,7 @@ import io.swagger.models.parameters.Parameter
 import io.swagger.models.properties.Property
 
 class PathDeserializer extends JsonDeserializer[Path] {
+
   @throws[IOException]
   override def deserialize(jp: JsonParser, ctxt: DeserializationContext): Path = {
     val node: JsonNode = jp.getCodec.readTree(jp)
@@ -22,6 +23,7 @@ class PathDeserializer extends JsonDeserializer[Path] {
 }
 
 class ResponseDeserializer extends JsonDeserializer[Response] {
+
   @throws[IOException]
   override def deserialize(jp: JsonParser, ctxt: DeserializationContext): Response = {
     val node: JsonNode = jp.getCodec.readTree(jp)
@@ -32,10 +34,13 @@ class ResponseDeserializer extends JsonDeserializer[Response] {
   }
 }
 
-class DeserializationModule(val includePathDeserializer: Boolean, val includeResponseDeserializer: Boolean) extends SimpleModule {
+class DeserializationModule(val includePathDeserializer: Boolean, val includeResponseDeserializer: Boolean)
+    extends SimpleModule {
 
-  if (includePathDeserializer) this.addDeserializer(classOf[Path], new PathDeserializer)
-  if (includeResponseDeserializer) this.addDeserializer(classOf[Response], new ResponseDeserializer)
+  if (includePathDeserializer)
+    this.addDeserializer(classOf[Path], new PathDeserializer)
+  if (includeResponseDeserializer)
+    this.addDeserializer(classOf[Response], new ResponseDeserializer)
   this.addDeserializer(classOf[Property], new PropertyDeserializer)
   this.addDeserializer(classOf[Model], new ModelDeserializer)
   this.addDeserializer(classOf[Parameter], new ParameterDeserializer)

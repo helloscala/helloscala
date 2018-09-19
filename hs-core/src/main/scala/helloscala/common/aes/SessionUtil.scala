@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadLocalRandom
 import javax.xml.bind.DatatypeConverter
 
 object SessionUtil {
+
   def randomString(length: Int) = {
     // http://stackoverflow.com/questions/41107/how-to-generate-a-random-alpha-numeric-string
     val random = ThreadLocalRandom.current()

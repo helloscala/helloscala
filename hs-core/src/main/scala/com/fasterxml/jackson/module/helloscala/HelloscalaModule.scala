@@ -25,7 +25,10 @@ import helloscala.common.jackson.{AkkaDoneSerialize, ObjectIdDeserializer, Objec
 import helloscala.common.types.ObjectId
 
 class HelloscalaSerializers extends Serializers.Base {
-  override def findSerializer(config: SerializationConfig, `type`: JavaType, beanDesc: BeanDescription): JsonSerializer[_] = {
+  override def findSerializer(
+      config: SerializationConfig,
+      `type`: JavaType,
+      beanDesc: BeanDescription): JsonSerializer[_] = {
     val rawClass = `type`.getRawClass
     if (classOf[ObjectId].isAssignableFrom(rawClass)) new ObjectIdSerializer
     else if (classOf[Done].isAssignableFrom(rawClass)) new AkkaDoneSerialize
@@ -34,8 +37,12 @@ class HelloscalaSerializers extends Serializers.Base {
 }
 
 class HelloscalaDeserializers extends Deserializers.Base {
+
   @throws[JsonMappingException]
-  override def findBeanDeserializer(`type`: JavaType, config: DeserializationConfig, beanDesc: BeanDescription): JsonDeserializer[_] = {
+  override def findBeanDeserializer(
+      `type`: JavaType,
+      config: DeserializationConfig,
+      beanDesc: BeanDescription): JsonDeserializer[_] = {
     val rawClass = `type`.getRawClass
     if (classOf[ObjectId].isAssignableFrom(rawClass)) new ObjectIdDeserializer
     else super.findBeanDeserializer(`type`, config, beanDesc)

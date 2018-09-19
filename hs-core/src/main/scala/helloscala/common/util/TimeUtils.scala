@@ -30,11 +30,17 @@ object TimeUtils extends StrictLogging {
 
   val DATE_TIME_EPOCH: LocalDateTime = LocalDateTime.of(1970, 1, 1, 0, 0, 0)
   val ZONE_CHINA_OFFSET: ZoneOffset = ZoneOffset.ofHours(8)
-  val formatterDateTime: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+  val formatterDateTime: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
   val formatterMonth: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
   val formatterDate: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-  val formatterDateHours: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH")
-  val formatterDateMinutes: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+  val formatterDateHours: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH")
+
+  val formatterDateMinutes: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
   val formatterMinutes: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
   val formatterTime: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -172,8 +178,10 @@ object TimeUtils extends StrictLogging {
    * @return 成功返回 LocalDateTime
    */
   def toLocalDateTime(date: String, time: String): LocalDateTime = {
-    val d = if (StringUtils.isNoneBlank(date)) toLocalDate(date) else LocalDate.now()
-    val t = if (StringUtils.isNoneBlank(time)) toLocalTime(time) else LocalTime.now()
+    val d =
+      if (StringUtils.isNoneBlank(date)) toLocalDate(date) else LocalDate.now()
+    val t =
+      if (StringUtils.isNoneBlank(time)) toLocalTime(time) else LocalTime.now()
     LocalDateTime.of(d, t)
   }
 
@@ -189,7 +197,8 @@ object TimeUtils extends StrictLogging {
         case Array(date, time) =>
           toLocalDateTime(date, time)
         case Array(dOrT) =>
-          if (containsDateKeys(dOrT)) toLocalDateTime(dOrT, "") else toLocalDateTime("", dOrT)
+          if (containsDateKeys(dOrT)) toLocalDateTime(dOrT, "")
+          else toLocalDateTime("", dOrT)
         case _ =>
           throw new DateTimeException(s"$ldt 是无效的日期时间格式，推荐格式：yyyy-MM-dd HH:mm:ss")
       }
@@ -216,26 +225,29 @@ object TimeUtils extends StrictLogging {
     else ZoneId.of(str)
   }
 
-  def toZonedDateTime(zdt: String): ZonedDateTime = try {
-    zdt.split("""[ Tt]+""") match {
-      case Array(date, timezone) =>
-        val (time, zone) = timezone.split("""[+-]""") match {
-          case Array(timeStr, zoneStr) =>
-            (timeStr, zoneOf((if (timezone.indexOf('-') < 0) '+' else '-') + zoneStr))
-          case Array(timeStr) => (timeStr, ZONE_CHINA_OFFSET)
-          case _              => throw new DateTimeException(s"$zdt 无有效的时区信息，推荐格式：yyyy-MM-dd HH:mm:ss[+Z]")
-        }
-        toZonedDateTime(date, time, zone)
-      case Array(dOrT) =>
-        if (containsDateKeys(dOrT)) toZonedDateTime(dOrT, "") else toZonedDateTime("", dOrT)
-      case _ =>
-        ZonedDateTime.parse(zdt)
+  def toZonedDateTime(zdt: String): ZonedDateTime =
+    try {
+      zdt.split("""[ Tt]+""") match {
+        case Array(date, timezone) =>
+          val (time, zone) = timezone.split("""[+-]""") match {
+            case Array(timeStr, zoneStr) =>
+              (timeStr, zoneOf((if (timezone.indexOf('-') < 0) '+' else '-') + zoneStr))
+            case Array(timeStr) => (timeStr, ZONE_CHINA_OFFSET)
+            case _ =>
+              throw new DateTimeException(s"$zdt 无有效的时区信息，推荐格式：yyyy-MM-dd HH:mm:ss[+Z]")
+          }
+          toZonedDateTime(date, time, zone)
+        case Array(dOrT) =>
+          if (containsDateKeys(dOrT)) toZonedDateTime(dOrT, "")
+          else toZonedDateTime("", dOrT)
+        case _ =>
+          ZonedDateTime.parse(zdt)
+      }
+    } catch {
+      case NonFatal(ex) =>
+        logger.warn(s"toZonedDateTime error: $zdt")
+        throw ex
     }
-  } catch {
-    case NonFatal(ex) =>
-      logger.warn(s"toZonedDateTime error: $zdt")
-      throw ex
-  }
 
   def toZonedDateTime(date: String, time: String): ZonedDateTime = {
     toZonedDateTime(date, time, ZONE_CHINA_OFFSET)
@@ -245,21 +257,27 @@ object TimeUtils extends StrictLogging {
     toLocalDateTime(date, time).atZone(zoneId)
   }
 
-  def toDate(ldt: LocalDateTime): Date = Date.from(ldt.toInstant(ZONE_CHINA_OFFSET))
+  def toDate(ldt: LocalDateTime): Date =
+    Date.from(ldt.toInstant(ZONE_CHINA_OFFSET))
 
   def toDate(zdt: ZonedDateTime): Date = Date.from(zdt.toInstant)
 
-  def toEpochMilli(dt: LocalDateTime): Long = dt.toInstant(ZONE_CHINA_OFFSET).toEpochMilli
+  def toEpochMilli(dt: LocalDateTime): Long =
+    dt.toInstant(ZONE_CHINA_OFFSET).toEpochMilli
 
-  def toEpochMilli(dt: String): Long = toLocalDateTime(dt).toInstant(ZONE_CHINA_OFFSET).toEpochMilli
+  def toEpochMilli(dt: String): Long =
+    toLocalDateTime(dt).toInstant(ZONE_CHINA_OFFSET).toEpochMilli
 
   def toSqlTimestamp(dt: LocalDateTime): SQLTimestamp = SQLTimestamp.valueOf(dt)
 
-  def toSqlTimestamp(zdt: ZonedDateTime): SQLTimestamp = SQLTimestamp.from(zdt.toInstant)
+  def toSqlTimestamp(zdt: ZonedDateTime): SQLTimestamp =
+    SQLTimestamp.from(zdt.toInstant)
 
-  def toSqlDate(date: LocalDate) = new SQLDate(toEpochMilli(date.atStartOfDay()))
+  def toSqlDate(date: LocalDate) =
+    new SQLDate(toEpochMilli(date.atStartOfDay()))
 
-  def toSqlTime(time: LocalTime) = new SQLTime(toEpochMilli(time.atDate(LocalDate.now())))
+  def toSqlTime(time: LocalTime) =
+    new SQLTime(toEpochMilli(time.atDate(LocalDate.now())))
 
   /**
    * @return 一天的开始：
@@ -269,7 +287,8 @@ object TimeUtils extends StrictLogging {
   /**
    * @return 一天的结尾：
    */
-  def nowEnd(): LocalDateTime = LocalTime.of(23, 59, 59, 999999999).atDate(LocalDate.now())
+  def nowEnd(): LocalDateTime =
+    LocalTime.of(23, 59, 59, 999999999).atDate(LocalDate.now())
 
   def toDayInt(localDateTime: LocalDateTime): Int = {
     toDayInt(localDateTime.toLocalDate)

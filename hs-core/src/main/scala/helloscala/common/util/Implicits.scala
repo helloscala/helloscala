@@ -21,7 +21,8 @@ import helloscala.common.util.Implicits.Option2Either
 import scala.language.implicitConversions
 
 trait Implicits {
-  implicit def option2Either[R](maybe: Option[R]): Option2Either[R] = new Option2Either(maybe)
+  implicit def option2Either[R](maybe: Option[R]): Option2Either[R] =
+    new Option2Either(maybe)
 }
 
 object Implicits {

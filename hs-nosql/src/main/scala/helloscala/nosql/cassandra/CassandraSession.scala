@@ -49,6 +49,7 @@ private class CqlCache(session: => Session) extends StrictLogging {
 private[cassandra] object GuavaFutures {
 
   implicit final class GuavaFutureOpts[A](val guavaFut: ListenableFuture[A]) extends AnyVal {
+
     def asScala(): Future[A] = {
       val p = Promise[A]()
       val callback = new FutureCallback[A] {
@@ -74,7 +75,7 @@ trait CassandraSession {
   /**
    * 获得 Cassandra 连接 Session
    */
-  protected implicit lazy val defaultSession: Session = conf.keyspace match {
+  implicit protected lazy val defaultSession: Session = conf.keyspace match {
     case None           => cluster.connect()
     case Some(keyspace) => cluster.connect(keyspace)
   }
@@ -96,13 +97,17 @@ trait CassandraSession {
 
   def source(stmt: Statement): Source[Row, NotUsed] = CassandraSource(stmt)
 
-  def runHead(stmt: Statement)(implicit mat: Materializer): Future[Row] = CassandraSource(stmt).runWith(Sink.head)
+  def runHead(stmt: Statement)(implicit mat: Materializer): Future[Row] =
+    CassandraSource(stmt).runWith(Sink.head)
 
-  def runSeq(stmt: Statement)(implicit mat: Materializer): Future[immutable.Seq[Row]] = CassandraSource(stmt).runWith(Sink.seq)
+  def runSeq(stmt: Statement)(implicit mat: Materializer): Future[immutable.Seq[Row]] =
+    CassandraSource(stmt).runWith(Sink.seq)
 
-  def executeAsync(stmt: Statement): Future[ResultSet] = defaultSession.executeAsync(stmt).asScala()
+  def executeAsync(stmt: Statement): Future[ResultSet] =
+    defaultSession.executeAsync(stmt).asScala()
 
-  def executeAsync(stmt: String): Future[ResultSet] = defaultSession.executeAsync(stmt).asScala()
+  def executeAsync(stmt: String): Future[ResultSet] =
+    defaultSession.executeAsync(stmt).asScala()
 
   def execute(stmt: Statement): ResultSet = defaultSession.execute(stmt)
 

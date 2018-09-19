@@ -47,9 +47,8 @@ case class ApiTokenInput(appId: String, timestamp: String, echoStr: String, acce
   require(StringUtils.isNoneBlank(timestamp), "hl-timestamp 不能为空")
   require(StringUtils.isNoneBlank(echoStr), "echo-str 不能为空")
   require(StringUtils.isNoneBlank(accessToken), "hl-access-token 不能为空")
-  require(
-    echoStr.length <= 40 && echoStr.forall(c => VALID_CHARS.contains(c)),
-    "随机字符串（不能超过40位字符，有效字符范围：[a-z][A-Z][0-9]）")
+  require(echoStr.length <= 40 && echoStr.forall(c => VALID_CHARS.contains(c)),
+          "随机字符串（不能超过40位字符，有效字符范围：[a-z][A-Z][0-9]）")
 }
 
 object ApiTokenInput {

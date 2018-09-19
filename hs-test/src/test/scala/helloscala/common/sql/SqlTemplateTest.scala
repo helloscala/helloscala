@@ -9,25 +9,15 @@ class SqlTemplateTest extends WordSpec {
 
   "SqlTemplateTest" should {
 
-    "executeSingle" in {
+    "executeSingle" in {}
 
-    }
+    "doInTransaction" in {}
 
-    "doInTransaction" in {
+    "execute" in {}
 
-    }
+    "executeQuery" in {}
 
-    "execute" in {
-
-    }
-
-    "executeQuery" in {
-
-    }
-
-    "executeUpdate" in {
-
-    }
+    "executeUpdate" in {}
 
   }
 }

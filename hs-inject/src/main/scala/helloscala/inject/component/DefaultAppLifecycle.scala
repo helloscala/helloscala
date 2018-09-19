@@ -29,7 +29,7 @@ import scala.concurrent.Future
  * Default implementation of the application lifecycle.
  */
 @Singleton
-class DefaultAppLifecycle @Inject() () extends AppLifecycle {
+class DefaultAppLifecycle @Inject()() extends AppLifecycle {
   private val logger = LoggerFactory.getLogger(classOf[DefaultAppLifecycle])
 
   private val hooks = new ConcurrentLinkedDeque[() => Future[_]]()

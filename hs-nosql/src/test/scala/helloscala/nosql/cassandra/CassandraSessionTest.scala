@@ -11,9 +11,10 @@ class StandaloneCassandraSession(val conf: CassandraConf) extends CassandraSessi
 }
 
 class CassandraSessionTest extends HelloscalaSpec with BeforeAndAfterAll {
+
   val cassandraSession: CassandraSession =
-    new StandaloneCassandraSession(CassandraConf(Configuration(ConfigFactory.parseString(
-      """nodes = ["dn126"]
+    new StandaloneCassandraSession(
+      CassandraConf(Configuration(ConfigFactory.parseString("""nodes = ["dn126"]
         |cluster-name = "Test Cluster"
         |username = "devops"
         |password = "hl.Data2017"
@@ -39,13 +40,9 @@ class CassandraSessionTest extends HelloscalaSpec with BeforeAndAfterAll {
       cassandraSession.executeAsync(sql)
     }
 
-    "select" in {
+    "select" in {}
 
-    }
-
-    "delete" in {
-
-    }
+    "delete" in {}
   }
 
 }

@@ -20,8 +20,7 @@ class ConfigurationTest extends WordSpec with MustMatchers with BeforeAndAfterAl
 
     "properties" in {
       val c = ConfigFactory
-        .parseString(
-          """datasource {
+        .parseString("""datasource {
             |  dataSourceDriverClass = "org.postgresql.JDBC"
             |  dataSource {
             |    username = "username"
@@ -36,33 +35,19 @@ class ConfigurationTest extends WordSpec with MustMatchers with BeforeAndAfterAl
       println(dm)
     }
 
-    "entrySet" in {
+    "entrySet" in {}
 
-    }
+    "keys" in {}
 
-    "keys" in {
+    "getNanos" in {}
 
-    }
+    "has" in {}
 
-    "getNanos" in {
+    "getOptional" in {}
 
-    }
+    "getMillis" in {}
 
-    "has" in {
-
-    }
-
-    "getOptional" in {
-
-    }
-
-    "getMillis" in {
-
-    }
-
-    "subKeys" in {
-
-    }
+    "subKeys" in {}
 
   }
 

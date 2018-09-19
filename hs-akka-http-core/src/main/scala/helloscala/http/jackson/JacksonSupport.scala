@@ -30,6 +30,7 @@ import scala.reflect.ClassTag
  * Created by yangbajing(yangbajing@gmail.com) on 2017-02-27.
  */
 object JacksonSupport extends JacksonSupport {
+
   def stringify(value: AnyRef): String = {
     Jackson.defaultObjectMapper.writeValueAsString(value)
   }
@@ -83,8 +84,7 @@ trait JacksonSupport {
       implicit
       ct: ClassTag[A],
       objectMapper: ObjectMapper = Jackson.defaultObjectMapper): FromEntityUnmarshaller[A] =
-    jsonStringUnmarshaller.map(
-      data => objectMapper.readValue(data, ct.runtimeClass).asInstanceOf[A])
+    jsonStringUnmarshaller.map(data => objectMapper.readValue(data, ct.runtimeClass).asInstanceOf[A])
 
   /**
    * `A` => HTTP entity

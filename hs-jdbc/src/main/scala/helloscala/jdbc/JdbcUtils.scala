@@ -19,14 +19,15 @@ package helloscala.jdbc
 import java.lang.reflect.{Field, Modifier}
 import java.sql._
 import java.time._
-import java.util.{Properties, HashMap => JHashMap, Map => JMap}
+import java.util.{Objects, Properties, HashMap => JHashMap, Map => JMap}
 
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.StrictLogging
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import helloscala.common.HSCommons
+import helloscala.common.{Configuration, HSCommons}
 import helloscala.common.util._
 
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.compat.java8.FunctionConverters._
 import scala.reflect.ClassTag
 
@@ -60,13 +61,19 @@ object JdbcUtils extends StrictLogging {
     val ALLOW_PRINT_LOG = "allowPrintLog"
     val NUM_THREADS = "numThreads"
     val MAX_CONNECTIONS = "maxConnections"
+    val REGISTER_MBEANS = "registerMbeans"
+    val QUEUE_SIZE = "queueSize"
 
-    val keys = List(USE_TRANSACTION, IGNORE_WARNINGS, ALLOW_PRINT_LOG, NUM_THREADS, MAX_CONNECTIONS)
+    val keys =
+      List(USE_TRANSACTION, IGNORE_WARNINGS, ALLOW_PRINT_LOG, NUM_THREADS, MAX_CONNECTIONS, REGISTER_MBEANS, QUEUE_SIZE)
   }
 
   // Check for JDBC 4.1 getObject(int, Class) method - available on JDK 7 and higher
   private val getObjectWithTypeAvailable =
     ClassUtils.hasMethod(classOf[ResultSet], "getObject", classOf[Int], classOf[Class[_]])
+
+  def columnLabels(metadata: ResultSetMetaData): immutable.IndexedSeq[String] =
+    (1 to metadata.getColumnCount).map(i => Option(metadata.getColumnLabel(i)).getOrElse(metadata.getColumnName(i)))
 
   /**
    * 将所有 :name 命名参数替换成?
@@ -103,13 +110,14 @@ object JdbcUtils extends StrictLogging {
       case None          => None
       case partial       => Some(partial)
     }
-    if (list.isEmpty) "" else list.mkString(" WHERE ", s" $step ", " ")
+    if (list.isEmpty) "" else list.mkString(" where ", s" $step ", " ")
   }
 
   def where(wheres: Seq[String], step: String = AND): String =
-    if (wheres.isEmpty) "" else wheres.mkString(" WHERE ", s" $step ", " ")
+    if (wheres.isEmpty) "" else wheres.mkString(" where ", s" $step ", " ")
 
-  def whereOption(wheres: Seq[Option[String]], step: String = AND): String = where(wheres.flatten, step)
+  def whereOption(wheres: Seq[Option[String]], step: String = AND): String =
+    where(wheres.flatten, step)
 
   def toCountSql(sql: String): String = {
     def indexOf(text: String, str: String): Int = {
@@ -143,7 +151,8 @@ object JdbcUtils extends StrictLogging {
 
   def nonInfLimit(limit: Int): Boolean = !isInfLimit(limit)
 
-  def nonInfLimit(limit: Int, additionalSql: => String): String = if (isInfLimit(limit)) "" else additionalSql
+  def nonInfLimit(limit: Int, additionalSql: => String): String =
+    if (isInfLimit(limit)) "" else additionalSql
 
   def resultSetToMap(rs: ResultSet): Map[String, Object] = {
     val metaData = rs.getMetaData
@@ -182,7 +191,8 @@ object JdbcUtils extends StrictLogging {
     result.toMap
   }
 
-  def resultSetToBean[T](rs: ResultSet)(implicit ev1: ClassTag[T]): T = resultSetToBean(rs, toPropertiesName = true)
+  def resultSetToBean[T](rs: ResultSet)(implicit ev1: ClassTag[T]): T =
+    resultSetToBean(rs, toPropertiesName = true)
 
   def resultSetToBean[T](rs: ResultSet, toPropertiesName: Boolean)(implicit ev1: ClassTag[T]): T = {
     val dest = ev1.runtimeClass.newInstance().asInstanceOf[T]
@@ -213,48 +223,48 @@ object JdbcUtils extends StrictLogging {
     new PreparedStatementActionImpl(args, func)
 
   def preparedStatementActionUseUpdate(args: Iterable[Any]): PreparedStatementAction[Int] =
-    new PreparedStatementActionImpl(
-      args,
-      pstmt => {
-        setStatementParameters(pstmt, args)
-        pstmt.executeUpdate()
-      })
+    new PreparedStatementActionImpl(args, pstmt => {
+      setStatementParameters(pstmt, args)
+      pstmt.executeUpdate()
+    })
 
-  def preparedStatementActionUseUpdate(args: Map[String, Any], paramIndex: Map[String, Int]): PreparedStatementAction[Int] =
-    new PreparedStatementActionImpl(
-      args,
-      pstmt => {
+  def preparedStatementActionUseUpdate(
+      args: Map[String, Any],
+      paramIndex: Map[String, Int]): PreparedStatementAction[Int] =
+    new PreparedStatementActionImpl(args, pstmt => {
+      for ((param, index) <- paramIndex) {
+        setParameter(pstmt, index, args(param))
+      }
+      pstmt.executeUpdate()
+    })
+
+  def preparedStatementActionUseBatchUpdate(
+      argsList: Iterable[Iterable[Any]]): PreparedStatementAction[scala.Array[Int]] =
+    new PreparedStatementActionImpl(argsList, pstmt => {
+      for (args <- argsList) {
+        setStatementParameters(pstmt, args)
+        pstmt.addBatch()
+      }
+      pstmt.executeBatch()
+    })
+
+  def preparedStatementActionUseBatchUpdate(
+      argsList: Iterable[Map[String, Any]],
+      paramIndex: Map[String, Int]): PreparedStatementAction[scala.Array[Int]] =
+    new PreparedStatementActionImpl(argsList, pstmt => {
+      for (args <- argsList) {
         for ((param, index) <- paramIndex) {
           setParameter(pstmt, index, args(param))
         }
-        pstmt.executeUpdate()
-      })
+        pstmt.addBatch()
+      }
+      pstmt.executeBatch()
+    })
 
-  def preparedStatementActionUseBatchUpdate(argsList: Iterable[Iterable[Any]]): PreparedStatementAction[scala.Array[Int]] =
-    new PreparedStatementActionImpl(
-      argsList,
-      pstmt => {
-        for (args <- argsList) {
-          setStatementParameters(pstmt, args)
-          pstmt.addBatch()
-        }
-        pstmt.executeBatch()
-      })
-
-  def preparedStatementActionUseBatchUpdate(argsList: Iterable[Map[String, Any]], paramIndex: Map[String, Int]): PreparedStatementAction[scala.Array[Int]] =
-    new PreparedStatementActionImpl(
-      argsList,
-      pstmt => {
-        for (args <- argsList) {
-          for ((param, index) <- paramIndex) {
-            setParameter(pstmt, index, args(param))
-          }
-          pstmt.addBatch()
-        }
-        pstmt.executeBatch()
-      })
-
-  def setStatementParameters(pstmt: PreparedStatement, args: Map[String, Any], paramIndex: Map[String, Int]): PreparedStatement = {
+  def setStatementParameters(
+      pstmt: PreparedStatement,
+      args: Map[String, Any],
+      paramIndex: Map[String, Int]): PreparedStatement = {
     for ((param, index) <- paramIndex) {
       setParameter(pstmt, index, args(param))
     }
@@ -274,13 +284,14 @@ object JdbcUtils extends StrictLogging {
 
   def setParameter(pstmt: PreparedStatement, i: Int, arg: Any): Unit = {
     val obj = arg match {
-      case zdt: ZonedDateTime => Timestamp.from(zdt.toInstant)
-      case ldt: LocalDateTime => Timestamp.valueOf(ldt)
-      case ld: LocalDate => Date.valueOf(ld)
-      case odt: OffsetDateTime => Timestamp.from(odt.toInstant)
-      case t: LocalTime => java.sql.Time.valueOf(t)
+      case zdt: ZonedDateTime   => Timestamp.from(zdt.toInstant)
+      case ldt: LocalDateTime   => Timestamp.valueOf(ldt)
+      case ld: LocalDate        => Date.valueOf(ld)
+      case odt: OffsetDateTime  => Timestamp.from(odt.toInstant)
+      case t: LocalTime         => java.sql.Time.valueOf(t)
       case e: Enumeration#Value => e.id
-      case d: java.util.Date if d.getClass.getName == JAVA_UTIL_DATE_NAME => new Date(d.getTime)
+      case d: java.util.Date if d.getClass.getName == JAVA_UTIL_DATE_NAME =>
+        new Date(d.getTime)
       case _ => arg
     }
     pstmt.setObject(i, obj)
@@ -356,8 +367,9 @@ object JdbcUtils extends StrictLogging {
     } else if (requiredType.isEnum) {
       rs.getObject(index) match {
         case s: String => s
-        case n: Number => NumberUtils.convertNumberToTargetClass(n, classOf[Integer])
-        case _         => rs.getString(index)
+        case n: Number =>
+          NumberUtils.convertNumberToTargetClass(n, classOf[Integer])
+        case _ => rs.getString(index)
       }
     } else {
       var value: Any = null
@@ -483,7 +495,7 @@ object JdbcUtils extends StrictLogging {
     if (source != null && source.startsWith("DB2")) {
       name = "DB2"
     } else if ("Sybase SQL Server" == source || "Adaptive Server Enterprise" == source || "ASE" == source ||
-      "sql server".equalsIgnoreCase(source)) {
+               "sql server".equalsIgnoreCase(source)) {
       name = "Sybase"
     }
     name
@@ -537,7 +549,10 @@ object JdbcUtils extends StrictLogging {
     convertPropertyNameToUnderscore(obj, true)
 
   def convertPropertyNameToUnderscore(obj: Map[String, Any], isLower: Boolean): Map[String, Any] =
-    obj.map { case (key, value) => convertPropertyNameToUnderscore(key, isLower) -> value }
+    obj.map {
+      case (key, value) =>
+        convertPropertyNameToUnderscore(key, isLower) -> value
+    }
 
   /**
    * 字符串从属性形式转换为全小写的下划线形式
@@ -546,7 +561,8 @@ object JdbcUtils extends StrictLogging {
    * @see convertPropertyNameToUnderscore(name: String, isLower: Boolean)
    * @return
    */
-  def convertPropertyNameToUnderscore(name: String): String = convertPropertyNameToUnderscore(name, isLower = true)
+  def convertPropertyNameToUnderscore(name: String): String =
+    convertPropertyNameToUnderscore(name, isLower = true)
 
   /**
    * 字符串从属性形式转换为下划线形式
@@ -564,13 +580,17 @@ object JdbcUtils extends StrictLogging {
         if (Character.isUpperCase(c)) {
           sb.append('_')
         }
-        sb.append(if (isLower) Character.toLowerCase(c) else Character.toUpperCase(c.toUpper))
+        sb.append(
+          if (isLower) Character.toLowerCase(c)
+          else Character.toUpperCase(c.toUpper))
       }
       sb.toString()
     }
 
   def convertUnderscoreNameToPropertyName(obj: Map[String, Any]): Map[String, Any] =
-    obj.map { case (key, value) => convertUnderscoreNameToPropertyName(key) -> value }
+    obj.map {
+      case (key, value) => convertUnderscoreNameToPropertyName(key) -> value
+    }
 
   def convertUnderscoreNameToPropertyName(obj: JMap[String, Object]): JMap[String, Object] = {
     val result = new JHashMap[String, Object]()
@@ -615,8 +635,142 @@ object JdbcUtils extends StrictLogging {
     result.toString
   }
 
+  def execute[R](
+      pscFunc: ConnectionPreparedStatementCreator,
+      actionFunc: PreparedStatementAction[R],
+      ignoreWarnings: Boolean = true,
+      allowPrintLog: Boolean = true,
+      useTransaction: Boolean = false,
+      autoClose: Boolean = false
+  )(implicit con: Connection): R = {
+    assert(Objects.nonNull(con), "con: Connection must not be null")
+    assert(Objects.nonNull(pscFunc), "Connection => PreparedStatement must not be null")
+    assert(Objects.nonNull(actionFunc), "PreparedStatement => R must not be null")
+
+    var pstmt: PreparedStatement = null
+    val isAutoCommit = con.getAutoCommit
+    var commitSuccess = false
+    var beginTime: Instant = null
+    try {
+      if (autoClose && useTransaction) {
+        con.setAutoCommit(false)
+      }
+
+      if (allowPrintLog) {
+        beginTime = Instant.now()
+      }
+
+      val connection = con
+      pstmt = pscFunc.apply(connection)
+      val result = actionFunc.apply(pstmt)
+      JdbcUtils.handleWarnings(ignoreWarnings, allowPrintLog, pstmt)
+      commitSuccess = true
+      result
+    } catch {
+      case sqlEx: SQLException =>
+        //        if (logger.underlying.isDebugEnabled) {
+        //          val metaData = pstmt.getParameterMetaData
+        //          val parameterTypes = (1 to metaData.getParameterCount).map(idx => metaData.getParameterTypeName(idx))
+        //          handleSqlLogs(beginTime, parameterTypes, pscFunc, actionFunc)
+        //        }
+        throw sqlEx
+    } finally {
+      val parameterTypes =
+        try {
+          if (allowPrintLog) {
+            val metaData = pstmt.getParameterMetaData
+            (1 to metaData.getParameterCount).map(idx => metaData.getParameterTypeName(idx))
+          } else
+            Nil
+        } catch {
+          case e: Exception =>
+            handleSqlLogs(beginTime, Nil, pscFunc, actionFunc)
+            logger.warn("获取parameterTypes异常", e)
+            Nil
+        }
+
+      closeStatement(pstmt)
+
+      if (autoClose) {
+        if (useTransaction) {
+          try {
+            if (commitSuccess) {
+              con.commit()
+            } else {
+              con.rollback()
+            }
+          } catch {
+            case ex: Exception =>
+              logger.error("提交或回滚事物失败", ex)
+          }
+          con.setAutoCommit(isAutoCommit)
+        }
+        JdbcUtils.closeConnection(con)
+      }
+
+      if (allowPrintLog) {
+        handleSqlLogs(beginTime, parameterTypes, pscFunc, actionFunc)
+      }
+    }
+  }
+
+  def handleSqlLogs(
+      beginTime: Instant,
+      parameterTypes: Seq[String],
+      pscFunc: ConnectionPreparedStatementCreator,
+      actionFunc: PreparedStatementAction[_]): Unit = {
+    val endTime = Instant.now()
+    val dua = java.time.Duration.between(beginTime, endTime)
+    val sql = pscFunc match {
+      case pscFuncImpl: ConnectionPreparedStatementCreatorImpl =>
+        pscFuncImpl.getSql
+      case _ => ""
+    }
+
+    var dumpParameters = ""
+    if (parameterTypes.nonEmpty) {
+      val parameters = actionFunc match {
+        case actionFuncImpl: PreparedStatementActionImpl[_] =>
+          parameterTypes.zip(actionFuncImpl.args).map {
+            case (paramType, value) => s"\t\t$paramType: $value"
+          }
+        case _ =>
+          parameterTypes.map(paramType => s"\t\t$paramType:")
+      }
+      dumpParameters = "\n" + parameters.mkString("\n")
+    }
+
+    logger.info(s"[$dua] $sql $dumpParameters")
+  }
+
+  def handleWarnings(ignoreWarnings: Boolean, allowPrintLog: Boolean, stmt: Statement): Unit =
+    if (ignoreWarnings) {
+      if (allowPrintLog) {
+        var warningToLog = stmt.getWarnings
+        while (warningToLog != null) {
+          logger.warn(
+            "SQLWarning ignored: SQL state '" + warningToLog.getSQLState + "', error code '" + warningToLog.getErrorCode + "', message [" + warningToLog.getMessage + "]")
+          warningToLog = warningToLog.getNextWarning
+        }
+      }
+    } else {
+      handleWarnings(stmt.getWarnings)
+    }
+
+  @inline
+  @throws[SQLWarning]
+  protected def handleWarnings(warning: SQLWarning): Unit = if (warning != null) throw warning
+
+  @inline def createHikariDataSource(config: Configuration): HikariDataSource =
+    createHikariDataSource(config.getProperties(null))
+
+  @inline def createHikariDataSource(config: Config): HikariDataSource =
+    createHikariDataSource(Configuration(config))
+
   def createHikariDataSource(props: Properties): HikariDataSource = {
-    val config = new HikariConfig(props)
+    val config = new HikariConfig(Keys.keys.foldLeft(props) { (props, key) =>
+      props.remove(key); props
+    })
     createHikariDataSource(config)
   }
 

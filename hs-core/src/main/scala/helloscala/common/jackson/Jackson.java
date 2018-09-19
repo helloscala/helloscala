@@ -16,11 +16,16 @@
 
 package helloscala.common.jackson;
 
+import scalapb.GeneratedMessage;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.JSR310DateTimeDeserializerBase;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -130,6 +135,8 @@ class ZonedDateTimeDeserializer extends JSR310DateTimeDeserializerBase<ZonedDate
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-14.
  */
 public class Jackson {
+    public static final Class<GeneratedMessage> FILTER_ID_CLASS = GeneratedMessage.class;
+
     public static final ObjectMapper defaultObjectMapper = createObjectMapper();
 
     public static ObjectNode createObjectNode() {
@@ -138,6 +145,14 @@ public class Jackson {
 
     public static ArrayNode createArrayNode() {
         return defaultObjectMapper.createArrayNode();
+    }
+
+    public static String stringify(Object value) throws JsonProcessingException {
+        return defaultObjectMapper.writeValueAsString(value);
+    }
+
+    public static String prettyStringify(Object value) throws JsonProcessingException {
+        return defaultObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
     }
 
     public static ObjectMapper createObjectMapper() {
@@ -152,6 +167,18 @@ public class Jackson {
         jtm.addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
 
         return new ObjectMapper(jf)
+                .setFilterProvider(
+                        new SimpleFilterProvider()
+                                .addFilter(FILTER_ID_CLASS.getName(), SimpleBeanPropertyFilter.serializeAllExcept("allFields")))
+                .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
+                    @Override
+                    public Object findFilterId(Annotated a) {
+                        if (FILTER_ID_CLASS.isAssignableFrom(a.getRawType())) {
+                            return FILTER_ID_CLASS.getName();
+                        }
+                        return super.findFilterId(a);
+                    }
+                })
                 .findAndRegisterModules()
                 .registerModule(new HelloscalaModule())
                 .registerModule(jtm)

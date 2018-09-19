@@ -31,9 +31,7 @@ import org.apache.tika.mime.MediaType
 import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.sax.BodyContentHandler
 
-object DocumentUtils extends DocumentUtils {
-
-}
+object DocumentUtils extends DocumentUtils {}
 
 class DocumentUtils {
   val config = TikaConfig.getDefaultConfig
@@ -82,7 +80,8 @@ class DocumentUtils {
     val fileName = path.getFileName.toString
     val isDocx = fileName.endsWith(".docx")
     val extractor =
-      if (isDocx) new XWPFWordExtractor(POIXMLDocument.openPackage(path.toString))
+      if (isDocx)
+        new XWPFWordExtractor(POIXMLDocument.openPackage(path.toString))
       else new WordExtractor(Files.newInputStream(path))
     try {
       val text = extractor.getText
@@ -112,6 +111,9 @@ class DocumentUtils {
   }
 
   def toMap(metadata: Metadata): Map[String, String] =
-    metadata.names().map(name => name -> metadata.getValues(name).mkString("; ")).toMap
+    metadata
+      .names()
+      .map(name => name -> metadata.getValues(name).mkString("; "))
+      .toMap
 
 }

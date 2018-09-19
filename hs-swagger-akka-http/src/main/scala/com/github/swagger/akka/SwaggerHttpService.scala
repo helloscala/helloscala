@@ -19,7 +19,7 @@ package com.github.swagger.akka
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.server.{Directives, PathMatchers, Route}
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.swagger.akka.model.{Info, asScala, scala2swagger}
+import com.github.swagger.akka.model.{asScala, scala2swagger, Info}
 import helloscala.common.jackson.Jackson
 import io.swagger.jaxrs.Reader
 import io.swagger.jaxrs.config.DefaultReaderConfig
@@ -41,11 +41,16 @@ object SwaggerHttpService {
 
   @tailrec
   def removeInitialSlashIfNecessary(path: String): String =
-    if (path.startsWith("/")) removeInitialSlashIfNecessary(path.substring(1)) else path
-  def prependSlashIfNecessary(path: String): String = if (path.startsWith("/")) path else s"/$path"
+    if (path.startsWith("/")) removeInitialSlashIfNecessary(path.substring(1))
+    else path
 
-  private[akka] def apiDocsBase(path: String) = PathMatchers.separateOnSlashes(removeInitialSlashIfNecessary(path))
-  private[akka] val logger = LoggerFactory.getLogger(classOf[SwaggerHttpService])
+  def prependSlashIfNecessary(path: String): String =
+    if (path.startsWith("/")) path else s"/$path"
+
+  private[akka] def apiDocsBase(path: String) =
+    PathMatchers.separateOnSlashes(removeInitialSlashIfNecessary(path))
+  private[akka] val logger =
+    LoggerFactory.getLogger(classOf[SwaggerHttpService])
 }
 
 trait SwaggerGenerator {
@@ -57,14 +62,17 @@ trait SwaggerGenerator {
   def apiDocsPath: String = "api-docs"
   def info: Info = Info()
   def schemes: List[Scheme] = List(Scheme.HTTP)
-  def securitySchemeDefinitions: Map[String, SecuritySchemeDefinition] = Map.empty
+
+  def securitySchemeDefinitions: Map[String, SecuritySchemeDefinition] =
+    Map.empty
   def externalDocs: Option[ExternalDocs] = None
   def vendorExtensions: Map[String, Object] = Map.empty
   def unwantedDefinitions: Seq[String] = Seq.empty
 
   def swaggerConfig: Swagger = {
     val modifiedPath = prependSlashIfNecessary(basePath)
-    val swagger = new Swagger().basePath(modifiedPath).info(info).schemes(schemes.asJava)
+    val swagger =
+      new Swagger().basePath(modifiedPath).info(info).schemes(schemes.asJava)
     if (StringUtils.isNotBlank(host)) swagger.host(host)
     swagger.setSecurityDefinitions(securitySchemeDefinitions.asJava)
     swagger.vendorExtensions(vendorExtensions.asJava)
@@ -78,7 +86,7 @@ trait SwaggerGenerator {
 
   def generateSwaggerJson: String = {
     try {
-      objectMapper /*.writer(new DefaultPrettyPrinter())*/ .writeValueAsString(filteredSwagger)
+      objectMapper /*.writer(new DefaultPrettyPrinter())*/.writeValueAsString(filteredSwagger)
     } catch {
       case NonFatal(t) =>
         logger.error("Issue with creating swagger.json", t)
@@ -99,7 +107,10 @@ trait SwaggerGenerator {
   private[akka] def filteredSwagger: Swagger = {
     val swagger: Swagger = reader.read(apiClasses.asJava)
     if (unwantedDefinitions.nonEmpty) {
-      swagger.setDefinitions(asScala(swagger.getDefinitions).filterKeys(definitionName => !unwantedDefinitions.contains(definitionName)).asJava)
+      swagger.setDefinitions(
+        asScala(swagger.getDefinitions)
+          .filterKeys(definitionName => !unwantedDefinitions.contains(definitionName))
+          .asJava)
     }
     swagger
   }
@@ -107,6 +118,7 @@ trait SwaggerGenerator {
 
 trait SwaggerHttpService extends Directives with SwaggerGenerator {
   import SwaggerHttpService._
+
   def routes: Route = {
     val base = apiDocsBase(apiDocsPath)
     path(base / "swagger.json") {

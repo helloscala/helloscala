@@ -1,6 +1,30 @@
 import Commons._
 import Dependencies._
+import Environment.{buildEnv, BuildEnv}
 import sbt._
+
+scalaVersion in ThisBuild := Dependencies.versionScala211
+
+scalafmtOnCompile in ThisBuild := true
+
+buildEnv in ThisBuild := {
+  sys.props
+    .get("build.env")
+    .orElse(sys.props.get("env"))
+    .orElse(sys.env.get("BUILD_ENV"))
+    .flatMap {
+      case "prod"  => Some(BuildEnv.Production)
+      case "stage" => Some(BuildEnv.Stage)
+      case "test"  => Some(BuildEnv.Test)
+      case "dev"   => Some(BuildEnv.Developement)
+      case _       => None
+    }
+    .getOrElse(BuildEnv.Developement)
+}
+
+version in ThisBuild := (if (buildEnv.value == BuildEnv.Developement && !_version.endsWith("-SNAPSHOT"))
+                           s"${_version}-SNAPSHOT"
+                         else _version)
 
 lazy val root = Project(id = "helloscala-root", base = file("."))
   .aggregate(
@@ -27,7 +51,7 @@ lazy val hsDoc = coreProject("hs-doc")
   .dependsOn(hsTest % "compile->test;test->test", hsCore)
   .settings(
     libraryDependencies ++= Seq(
-    ) ++ _poi ++ _tika
+      ) ++ _poi ++ _tika
   )
 
 lazy val hsStarterNosql = coreProject("hs-starter-nosql")
@@ -36,7 +60,8 @@ lazy val hsStarterNosql = coreProject("hs-starter-nosql")
 lazy val hsInjectTest = coreProject("hs-inject-test")
   .dependsOn(
     hsInject,
-    hsTest % "compile->test;test->test", hsCore
+    hsTest % "compile->test;test->test",
+    hsCore
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -45,9 +70,7 @@ lazy val hsInjectTest = coreProject("hs-inject-test")
   )
 
 lazy val hsInject = coreProject("hs-inject")
-  .dependsOn(
-    hsJdbc, hsDiscovery, hsAkkaHttp,
-    hsTest % "compile->test;test->test", hsCore)
+  .dependsOn(hsJdbc, hsDiscovery, hsAkkaHttp, hsTest % "compile->test;test->test", hsCore)
   .settings(
     libraryDependencies ++= Seq(
       _hikariCP % Provided,
@@ -112,7 +135,6 @@ lazy val hsSlick = coreProject("hs-slick")
     ) ++ _slick ++ _slickPg
   )
 
-
 lazy val hsJdbc = coreProject("hs-jdbc")
   .dependsOn(hsTest % "compile->test;test->test", hsCore)
   .settings(
@@ -153,14 +175,25 @@ lazy val hsCore = coreProject("hs-core")
       _logbackClassic,
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       _typesafeConfig
-    ) ++ _akka ++ _jackson
+    ) ++ _akka ++ _jackson,
+    PB.protocVersion := "-v361",
+    PB.targets in Compile := Seq(
+      scalapb.gen(flatPackage = true) -> (sourceManaged in Compile).value
+    )
   )
 
-def coreProject(name: String) = Project(id = name, base = file(name))
-  .settings(basicSettings: _*)
-  .settings(Publishing.publishing: _*)
-  .settings(
-    organization := "helloscala"
-  )
+def coreProject(name: String) =
+  Project(id = name, base = file(name))
+    .settings(basicSettings: _*)
+    .settings(Publishing.publishing: _*)
+    .settings(
+      organization := "helloscala"
+    )
 
+def _version: String =
+  sys.props
+    .get("build.version")
+    .orElse(sys.env.get("BUILD_VERSION"))
+    .getOrElse("1.1.10")

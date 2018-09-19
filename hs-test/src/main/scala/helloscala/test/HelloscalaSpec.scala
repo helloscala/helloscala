@@ -29,16 +29,13 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
-trait TSpec
-  extends MustMatchers
-  with OptionValues
-  with EitherValues
-  with ScalaFutures {
+trait TSpec extends MustMatchers with OptionValues with EitherValues with ScalaFutures {
   this: Suite =>
 
   val defaultObjectMapper: ObjectMapper = Jackson.defaultObjectMapper
 
-  implicit val defaultPatience: PatienceConfig = PatienceConfig(Span(90, Seconds), Span(100, Millis))
+  implicit val defaultPatience: PatienceConfig =
+    PatienceConfig(Span(90, Seconds), Span(100, Millis))
 
   def jsonPrettyString[T](f: Future[T]): String = {
     val results = f.futureValue
@@ -71,7 +68,8 @@ trait AkkaSpec extends BeforeAndAfterAll {
 
   implicit def actorMaterializer: ActorMaterializer = ActorMaterializer()
 
-  implicit def executionContext: ExecutionContextExecutor = actorSystem.dispatcher
+  implicit def executionContext: ExecutionContextExecutor =
+    actorSystem.dispatcher
 
   override protected def afterAll(): Unit = {
     Await.result(actorSystem.terminate(), 60.seconds)

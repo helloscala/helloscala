@@ -67,7 +67,8 @@ object ObjectId {
   private val maxCounterValue = 16777216
   private val increment = new java.util.concurrent.atomic.AtomicInteger(scala.util.Random.nextInt(maxCounterValue))
 
-  private def counter() = (increment.getAndIncrement + maxCounterValue) % maxCounterValue
+  private def counter() =
+    (increment.getAndIncrement + maxCounterValue) % maxCounterValue
 
   /**
    * The following implemtation of machineId work around openjdk limitations in
@@ -85,7 +86,6 @@ object ObjectId {
    * and fix in openjdk8:
    * * http://hg.openjdk.java.net/jdk8/tl/jdk/rev/b1814b3ea6d3
    */
-
   private val machineId = {
     import java.net._
     def p(n: String) = System.getProperty(n)
@@ -99,12 +99,18 @@ object ObjectId {
     }.getOrElse(false)
 
     // Check java policies
-    val permitted = Try(System.getSecurityManager.checkPermission(new NetPermission("getNetworkInformation"))).toOption.exists(_ => true)
+    val permitted =
+      Try(System.getSecurityManager.checkPermission(new NetPermission("getNetworkInformation"))).toOption.exists(_ =>
+        true)
 
     if (validPlatform && permitted) {
       val networkInterfacesEnum = NetworkInterface.getNetworkInterfaces
-      val networkInterfaces = scala.collection.JavaConverters.enumerationAsScalaIteratorConverter(networkInterfacesEnum).asScala
-      val ha = networkInterfaces.find(ha => Try(ha.getHardwareAddress).isSuccess && ha.getHardwareAddress != null && ha.getHardwareAddress.length == 6)
+      val networkInterfaces = scala.collection.JavaConverters
+        .enumerationAsScalaIteratorConverter(networkInterfacesEnum)
+        .asScala
+      val ha = networkInterfaces
+        .find(ha =>
+          Try(ha.getHardwareAddress).isSuccess && ha.getHardwareAddress != null && ha.getHardwareAddress.length == 6)
         .map(_.getHardwareAddress)
         .getOrElse(InetAddress.getLocalHost.getHostName.getBytes(StandardCharsets.UTF_8))
       Converters.md5(ha).take(3)
@@ -148,7 +154,8 @@ object ObjectId {
   /** Tries to make a BSON ObjectId from a hexadecimal string representation. */
   def parse(id: String): Try[ObjectId] = {
     if (isValid(id)) Try(new ObjectId(Converters.str2Hex(id)))
-    else Failure(new IllegalArgumentException(s"Wrong ObjectId (It is not a valid 16 Decimal 24 bit string): '$id'"))
+    else
+      Failure(new IllegalArgumentException(s"Wrong ObjectId (It is not a valid 16 Decimal 24 bit string): '$id'"))
   }
 
   def isValid(id: String): Boolean = {
@@ -176,7 +183,8 @@ object ObjectId {
    */
   def generate(): ObjectId = get()
 
-  def get(): ObjectId = fromTime(System.currentTimeMillis, fillOnlyTimestamp = false)
+  def get(): ObjectId =
+    fromTime(System.currentTimeMillis, fillOnlyTimestamp = false)
 
   def getString(): String = get().toString()
 
@@ -230,7 +238,8 @@ object ObjectId {
 /** Common functions */
 object Converters {
   private val HEX_CHARS: Array[Char] = "0123456789abcdef".toCharArray
-  private val HEX_CHAR_SETS = Set.empty[Char] ++ ('0' to '9') ++ ('a' to 'f') ++ ('A' to 'F')
+  private val HEX_CHAR_SETS = Set
+    .empty[Char] ++ ('0' to '9') ++ ('a' to 'f') ++ ('A' to 'F')
 
   def isHex(c: Char): Boolean = {
     HEX_CHAR_SETS.contains(c)

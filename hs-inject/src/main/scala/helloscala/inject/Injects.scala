@@ -16,6 +16,4 @@
 
 package helloscala.inject
 
-object Injects extends InjectSystemSupport {
-
-}
+object Injects extends InjectSystemSupport {}

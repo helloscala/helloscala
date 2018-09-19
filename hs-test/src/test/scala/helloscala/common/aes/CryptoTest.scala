@@ -9,8 +9,18 @@ import helloscala.test.HelloscalaSpec
 class CryptoTest extends HelloscalaSpec {
   val SPLIT: String = 0x1.toChar.toString
 
-  def makeTest(due: Instant) = Seq(Utils.randomString(3), "passportId", Utils.randomString(3), "appId", Utils.randomString(3), "userId", Utils.randomString(3), due.getEpochSecond, Utils.randomString(3))
-    .mkString(SPLIT)
+  def makeTest(due: Instant) =
+    Seq(
+      Utils.randomString(3),
+      "passportId",
+      Utils.randomString(3),
+      "appId",
+      Utils.randomString(3),
+      "userId",
+      Utils.randomString(3),
+      due.getEpochSecond,
+      Utils.randomString(3)
+    ).mkString(SPLIT)
 
   "CryptoTest" should {
     //    val secret = "c05ll3lesrinf39t7mc5h6un6r0c69lgfno69dsak3vabeqamouq4328cuaekros401ajdpkh60rrtpd8ro24rbuqmgtnd1ebag6ljnb65i8a55d482ok7o0nch0bfbe"

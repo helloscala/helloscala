@@ -86,7 +86,8 @@ trait HSAkkaHttpServer extends BaseExceptionPF with BaseRejectionBuilder with St
   }
 
   def handleMapResponse(response: HttpResponse): HttpResponse = {
-    val name = hlServerValue + ":" + configuration.getString("server.host") + ":" + configuration.get[Int]("server.port")
+    val name = hlServerValue + ":" + configuration.getString("server.host") + ":" + configuration
+      .get[Int]("server.port")
     val headers = HSServerHeader(name) +: response.headers
     response.copy(headers = headers)
   }
@@ -112,12 +113,14 @@ trait HSAkkaHttpServer extends BaseExceptionPF with BaseRejectionBuilder with St
       //    val password = "abcdef".toCharArray // do not store passwords in code, read them from somewhere safe!
 
       val ks = KeyStore.getInstance("PKCS12")
-      val keystore = getClass.getClassLoader.getResourceAsStream("ssl-keys/server.p12")
+      val keystore =
+        getClass.getClassLoader.getResourceAsStream("ssl-keys/server.p12")
 
       require(keystore != null, "Keystore required!")
       ks.load(keystore, password)
 
-      val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+      val keyManagerFactory: KeyManagerFactory =
+        KeyManagerFactory.getInstance("SunX509")
       keyManagerFactory.init(ks, password)
 
       val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
@@ -143,33 +146,32 @@ trait HSAkkaHttpServer extends BaseExceptionPF with BaseRejectionBuilder with St
    * @return
    */
   def startServer(): (Future[ServerBinding], Option[Future[ServerBinding]]) =
-    startServer(
-      configuration.getString("server.host"),
-      configuration.getInt("server.port"),
-      configuration.get[Option[Int]]("server.https-port"))
+    startServer(configuration.getString("server.host"),
+                configuration.getInt("server.port"),
+                configuration.get[Option[Int]]("server.https-port"))
 
   /**
    * 根据设置的host:绑定主机名和port:绑定网络端口 启动Akka HTTP服务
    */
-  def startServer(host: String, port: Int, httpsPort: Option[Int]): (Future[ServerBinding], Option[Future[ServerBinding]]) = {
+  def startServer(
+      host: String,
+      port: Int,
+      httpsPort: Option[Int]): (Future[ServerBinding], Option[Future[ServerBinding]]) = {
     implicit val system: ActorSystem = actorSystem
     implicit val mat: ActorMaterializer = actorMaterializer
-    implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
+    implicit val executionContext: ExecutionContextExecutor =
+      actorSystem.dispatcher
 
     writePidfile()
 
     val flow: Flow[HttpRequest, HttpResponse, Any] =
       (handleRejections(rejectionHandler) &
         handleExceptions(exceptionHandler)) {
-          routes.route
-        }
+        routes.route
+      }
     val handler = flow.map(handleMapResponse)
 
-    bindingFuture = Http().bindAndHandle(
-      handler,
-      interface = host,
-      port = port,
-      settings = ServerSettings(actorSystem))
+    bindingFuture = Http().bindAndHandle(handler, interface = host, port = port, settings = ServerSettings(actorSystem))
 
     bindingFuture.onComplete {
       case Success(binding) ⇒
@@ -182,12 +184,11 @@ trait HSAkkaHttpServer extends BaseExceptionPF with BaseRejectionBuilder with St
     }
 
     httpsBindingFuture = httpsPort.map { portSsl =>
-      val f = Http().bindAndHandle(
-        handler,
-        interface = host,
-        port = portSsl,
-        connectionContext = generateHttps(),
-        settings = ServerSettings(actorSystem))
+      val f = Http().bindAndHandle(handler,
+                                   interface = host,
+                                   port = portSsl,
+                                   connectionContext = generateHttps(),
+                                   settings = ServerSettings(actorSystem))
       f.onComplete {
         case Success(binding) ⇒
           //setting the server binding for possible future uses in the client
@@ -214,7 +215,8 @@ trait HSAkkaHttpServer extends BaseExceptionPF with BaseRejectionBuilder with St
         .orNull
     try {
       if (StringUtils.isNoneBlank(pidfilePath)) {
-        PidFile(HSCommons.getPid).create(Paths.get(pidfilePath), deleteOnExit = true)
+        PidFile(HSCommons.getPid)
+          .create(Paths.get(pidfilePath), deleteOnExit = true)
       } else {
         logger.warn("-Dpidfile.path 未设置，将不写入 .pid 文件。")
       }

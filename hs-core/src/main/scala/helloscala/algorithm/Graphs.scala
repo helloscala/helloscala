@@ -55,7 +55,7 @@ object Graphs extends StrictLogging {
             } else {
               searched += pending
               Some(pending)
-            })
+          })
 
         searchQueue.enqueue(pendings: _*)
         logger.debug(s"[$count] $person $searchQueue")
@@ -84,10 +84,13 @@ object Graphs extends StrictLogging {
     // start 节点到任一节点最短花费
     val costs = mutable.Map.empty[T, Int] ++
       startNeighbors ++
-      graph.keysIterator.filterNot(node => node == start || startNeighbors.contains(node)).map(node => node -> Int.MaxValue)
+      graph.keysIterator
+        .filterNot(node => node == start || startNeighbors.contains(node))
+        .map(node => node -> Int.MaxValue)
 
     // 最短花费的父节点映射
-    val parents = mutable.Map.empty[T, Option[T]] ++ graph(start).keys.map(key => (key, Some(start)))
+    val parents = mutable.Map.empty[T, Option[T]] ++ graph(start).keys
+      .map(key => (key, Some(start)))
 
     /**
      * 从未处理节点中找到开销最小的节点

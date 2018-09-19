@@ -23,4 +23,3 @@ import java.util.UUID
  * @param data UUID
  */
 case class TimeUUID(data: UUID)
-

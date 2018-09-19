@@ -24,12 +24,11 @@ import helloscala.common.aes.HSBizMsgCrypt
 case class ByteSaltPassword(salt: Array[Byte], saltPassword: Array[Byte])
 
 case class SaltPassword(salt: String, saltPassword: String) {
-  require(
-    StringUtils.isNoneBlank(salt) && salt.length == SaltPassword.SALT_LENGTH,
-    s"salt字符串长度必需为${SaltPassword.SALT_LENGTH}")
-  require(
-    StringUtils.isNoneBlank(saltPassword) && saltPassword.length == SaltPassword.SALT_PASSWORD_LENGTH,
-    s"salt字符串长度必需为${SaltPassword.SALT_PASSWORD_LENGTH}")
+  require(StringUtils.isNoneBlank(salt) && salt.length == SaltPassword.SALT_LENGTH,
+          s"salt字符串长度必需为${SaltPassword.SALT_LENGTH}")
+  require(StringUtils
+            .isNoneBlank(saltPassword) && saltPassword.length == SaltPassword.SALT_PASSWORD_LENGTH,
+          s"salt字符串长度必需为${SaltPassword.SALT_PASSWORD_LENGTH}")
 }
 
 object SaltPassword {
@@ -43,7 +42,8 @@ object SecurityUtils {
 
   def generateBizMsgCrypt(configuration: Configuration): HSBizMsgCrypt = {
     val key = configuration.getString("helloscala.crypt.client-key")
-    val encodingAesKey = configuration.getString("helloscala.crypt.encoding-aes-key")
+    val encodingAesKey =
+      configuration.getString("helloscala.crypt.encoding-aes-key")
     val appId = configuration.getString("helloscala.crypt.client-id")
     new HSBizMsgCrypt(key, encodingAesKey, appId)
   }

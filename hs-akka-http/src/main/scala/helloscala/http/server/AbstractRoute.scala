@@ -56,13 +56,19 @@ trait AbstractRoute extends Directives {
     }
 
   implicit def localDateFromStringUnmarshaller: FromStringUnmarshaller[LocalDate] =
-    Unmarshaller.strict[String, LocalDate] { str => LocalDate.parse(str, TimeUtils.formatterDate) }
+    Unmarshaller.strict[String, LocalDate] { str =>
+      LocalDate.parse(str, TimeUtils.formatterDate)
+    }
 
   implicit def localTimeFromStringUnmarshaller: FromStringUnmarshaller[LocalTime] =
-    Unmarshaller.strict[String, LocalTime] { str => LocalTime.parse(str, TimeUtils.formatterTime) }
+    Unmarshaller.strict[String, LocalTime] { str =>
+      LocalTime.parse(str, TimeUtils.formatterTime)
+    }
 
   implicit def localDateTimeFromStringUnmarshaller: FromStringUnmarshaller[LocalDateTime] =
-    Unmarshaller.strict[String, LocalDateTime] { str => LocalDateTime.parse(str, TimeUtils.formatterDateTime) }
+    Unmarshaller.strict[String, LocalDateTime] { str =>
+      LocalDateTime.parse(str, TimeUtils.formatterDateTime)
+    }
 
   def ObjectIdPath: PathMatcher1[ObjectId] =
     PathMatcher("""[\da-fA-F]{24}""".r) flatMap { string =>
@@ -77,29 +83,34 @@ trait AbstractRoute extends Directives {
       Some(string).filter(ObjectId.isValid)
     }
 
-  def hsLogRequest(logger: com.typesafe.scalalogging.Logger): Directive0 = mapRequest { req =>
-    def entity = req.entity match {
-      case HttpEntity.Empty => ""
-      case _                => "\n" + req.entity
-    }
+  def hsLogRequest(logger: com.typesafe.scalalogging.Logger): Directive0 =
+    mapRequest { req =>
+      def entity = req.entity match {
+        case HttpEntity.Empty => ""
+        case _                => "\n" + req.entity
+      }
 
-    logger.debug(
-      s"""
+      logger.debug(s"""
          |method: ${req.method.value}
          |uri: ${req.uri}
          |search: ${req.uri.rawQueryString}
          |header: ${req.headers.mkString("\n        ")}$entity""".stripMargin)
-    req
-  }
+      req
+    }
 
   def extractPageInput: Directive1[PageInput] = extract { ctx =>
     val query = ctx.request.uri.query()
-    val page = query.get("page").flatMap(AsInt.unapply).getOrElse(Page.DEFAULT_PAGE)
-    val size = query.get("size").flatMap(AsInt.unapply).getOrElse(Page.DEFAULT_SIZE)
-    PageInput(page, size, query.filterNot { case (name, _) => name == "page" || name == "size" }.toMap)
+    val page =
+      query.get("page").flatMap(AsInt.unapply).getOrElse(Page.DEFAULT_PAGE)
+    val size =
+      query.get("size").flatMap(AsInt.unapply).getOrElse(Page.DEFAULT_SIZE)
+    PageInput(page, size, query.filterNot {
+      case (name, _) => name == "page" || name == "size"
+    }.toMap)
   }
 
-  def notPathPrefixTest[L](pm: PathMatcher[L]): Directive0 = rawNotPathPrefixTest(Slash ~ pm)
+  def notPathPrefixTest[L](pm: PathMatcher[L]): Directive0 =
+    rawNotPathPrefixTest(Slash ~ pm)
 
   def rawNotPathPrefixTest[L](pm: PathMatcher[L]): Directive0 = {
     implicit val LIsTuple: Tuple[L] = pm.ev
@@ -112,7 +123,8 @@ trait AbstractRoute extends Directives {
   }
 
   def setNoCache: Directive0 =
-    mapResponseHeaders(h => h ++ List(headers.`Cache-Control`(`no-store`, `no-cache`), headers.RawHeader("Pragma", "no-cache")))
+    mapResponseHeaders(
+      h => h ++ List(headers.`Cache-Control`(`no-store`, `no-cache`), headers.RawHeader("Pragma", "no-cache")))
 
   def completeOk: Route = complete(HttpEntity.Empty)
 
@@ -126,17 +138,25 @@ trait AbstractRoute extends Directives {
 
   def pathDelete[L](pm: PathMatcher[L]): Directive[L] = path(pm) & delete
 
-  def putEntity[T](um: FromRequestUnmarshaller[T]): Directive1[T] = put & entity(um)
+  def putEntity[T](um: FromRequestUnmarshaller[T]): Directive1[T] =
+    put & entity(um)
 
-  def postEntity[T](um: FromRequestUnmarshaller[T]): Directive1[T] = post & entity(um)
+  def postEntity[T](um: FromRequestUnmarshaller[T]): Directive1[T] =
+    post & entity(um)
 
-  def completionStageComplete(future: java.util.concurrent.CompletionStage[AnyRef], needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route = {
+  def completionStageComplete(
+      future: java.util.concurrent.CompletionStage[AnyRef],
+      needContainer: Boolean = false,
+      successCode: StatusCode = StatusCodes.OK): Route = {
     import scala.compat.java8.FutureConverters._
     val f: AnyRef => Route = objectComplete(_, needContainer, successCode)
     onSuccess(future.toScala).apply(f)
   }
 
-  def futureComplete(future: Future[AnyRef], needContainer: Boolean = false, successCode: StatusCode = StatusCodes.OK): Route = {
+  def futureComplete(
+      future: Future[AnyRef],
+      needContainer: Boolean = false,
+      successCode: StatusCode = StatusCodes.OK): Route = {
     val f: AnyRef => Route = objectComplete(_, needContainer, successCode)
     onSuccess(future).apply(f)
   }
@@ -165,9 +185,11 @@ trait AbstractRoute extends Directives {
       case result: ApiResult =>
         import helloscala.http.jackson.JacksonSupport._
         val status =
-          if (result.getErrCode == null || result.getErrCode.equals(0)) StatusCodes.OK
+          if (result.getErrCode == null || result.getErrCode.equals(0))
+            StatusCodes.OK
           else if (successCode != StatusCodes.OK) successCode
-          else StatusCodes.getForKey(result.getErrCode).getOrElse(StatusCodes.OK)
+          else
+            StatusCodes.getForKey(result.getErrCode).getOrElse(StatusCodes.OK)
         complete((status, result))
 
       case status: StatusCode =>
@@ -263,10 +285,10 @@ trait AbstractRoute extends Directives {
       sourceQueue: AkkaHttpSourceQueue): Route = {
     extractRequestContext { ctx =>
       val req = ctx.request
-      val request = HttpUtils.applyApiToken(
-        req.copy(uri = uri.withQuery(req.uri.query())),
-        appIdKeyTokenConfig.appId,
-        appIdKeyTokenConfig.appKey)
+      val request =
+        HttpUtils.applyApiToken(req.copy(uri = uri.withQuery(req.uri.query())),
+                                appIdKeyTokenConfig.appId,
+                                appIdKeyTokenConfig.appKey)
       val future = HttpUtils.hostRequest(request)(sourceQueue.httpSourceQueue, ctx.executionContext)
       onSuccess(future) { response =>
         complete(response)

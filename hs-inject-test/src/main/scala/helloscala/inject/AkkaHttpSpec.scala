@@ -23,12 +23,12 @@ import helloscala.test.HelloscalaSpec
 import org.scalatest.BeforeAndAfterAll
 
 trait AkkaHttpSpec
-  extends HelloscalaSpec
-  with BeforeAndAfterAll
-  with InjectSystemSupport
-  with BaseExceptionPF
-  with BaseRejectionBuilder
-  with ScalatestRouteTest {
+    extends HelloscalaSpec
+    with BeforeAndAfterAll
+    with InjectSystemSupport
+    with BaseExceptionPF
+    with BaseRejectionBuilder
+    with ScalatestRouteTest {
 
   implicit protected def _rejectionHandler: RejectionHandler = rejectionHandler
 

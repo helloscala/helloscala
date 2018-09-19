@@ -38,7 +38,10 @@ trait BaseExceptionPF extends StrictLogging {
             val t = e.getCause
             //            if (t != null) logger.warn(s"URI[$uri] ${e.toString}", t) else logger.warn(s"URI[$uri] ${e.toString}")
             logger.warn(s"Exception[${e.getClass.getSimpleName}] URI[$uri] ${e.getMessage}", t)
-            (StatusCodes.getForKey(e.getHttpStatus).getOrElse(StatusCodes.Conflict), ApiResult.error(e.getErrCode, e.getErrMsg, e.getData))
+            (StatusCodes
+               .getForKey(e.getHttpStatus)
+               .getOrElse(StatusCodes.Conflict),
+             ApiResult.error(e.getErrCode, e.getErrMsg, e.getData))
 
           case e: IllegalArgumentException =>
             logger.debug(s"Illegal Argument: ${e.getMessage}", e)

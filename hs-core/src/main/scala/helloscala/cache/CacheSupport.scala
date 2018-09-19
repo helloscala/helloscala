@@ -26,11 +26,8 @@ trait CacheSupport {
 
   def getCache(key: CacheKey): Option[CacheValue]
 
-  def findCacheDirect(
-      key: CacheKey,
-      func: () => Future[CacheValue])(implicit ec: ExecutionContext): Future[CacheValue]
+  def findCacheDirect(key: CacheKey, func: () => Future[CacheValue])(implicit ec: ExecutionContext): Future[CacheValue]
 
-  def findCache(
-      key: CacheKey,
-      func: () => Future[Option[CacheValue]])(implicit ec: ExecutionContext): Future[Option[CacheValue]]
+  def findCache(key: CacheKey, func: () => Future[Option[CacheValue]])(
+      implicit ec: ExecutionContext): Future[Option[CacheValue]]
 }

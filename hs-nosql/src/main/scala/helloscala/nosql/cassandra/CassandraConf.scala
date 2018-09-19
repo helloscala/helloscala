@@ -49,7 +49,8 @@ case class CassandraConf(
 
 object CassandraConf {
 
-  def apply(config: Configuration, path: String): CassandraConf = apply(config.get[Configuration](path))
+  def apply(config: Configuration, path: String): CassandraConf =
+    apply(config.get[Configuration](path))
 
   def apply(config: Configuration): CassandraConf =
     CassandraConf(
@@ -58,6 +59,7 @@ object CassandraConf {
       config.get[Option[String]]("local-dc"),
       config.get[Option[String]]("username"),
       config.get[Option[String]]("password"),
-      config.get[Option[String]]("keyspace"))
+      config.get[Option[String]]("keyspace")
+    )
 
 }

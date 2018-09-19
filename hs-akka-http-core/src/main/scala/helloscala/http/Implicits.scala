@@ -29,17 +29,28 @@ import scala.reflect.ClassTag
 object Implicits {
 
   implicit class FutureToObject(future: Future[HttpResponse]) {
+
     def to[T](implicit ev: ClassTag[T], mat: Materializer, ex: ExecutionContext): Future[Either[HSException, T]] = {
       future
-        .flatMap(response => Unmarshal(response.entity).to[String].map(str => response.status -> str))
+        .flatMap(
+          response =>
+            Unmarshal(response.entity)
+              .to[String]
+              .map(str => response.status -> str))
         .map {
           case (status, str) if okStatus(status.intValue()) =>
             if (StringUtils.isNoneBlank(str))
-              Right(Jackson.defaultObjectMapper.readValue(str, ev.runtimeClass).asInstanceOf[T])
+              Right(
+                Jackson.defaultObjectMapper
+                  .readValue(str, ev.runtimeClass)
+                  .asInstanceOf[T])
             else
               Right(str.asInstanceOf[T])
           case (status, str) =>
-            Left(Jackson.defaultObjectMapper.readValue(str, classOf[HSException]).asInstanceOf[HSException])
+            Left(
+              Jackson.defaultObjectMapper
+                .readValue(str, classOf[HSException])
+                .asInstanceOf[HSException])
         }
     }
   }

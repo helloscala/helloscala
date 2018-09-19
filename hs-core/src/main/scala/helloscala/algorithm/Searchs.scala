@@ -19,6 +19,7 @@ package helloscala.algorithm
 import scala.annotation.tailrec
 
 object Searchs {
+
   /**
    * 泛型二分查找
    * @param list 待查找的列表

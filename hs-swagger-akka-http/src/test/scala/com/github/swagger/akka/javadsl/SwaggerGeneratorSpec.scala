@@ -23,8 +23,13 @@ class SwaggerGeneratorSpec extends WordSpec with Matchers {
     "properly convert the javadsl settings" in {
       val contact = new Contact().email("a@b.com").name("a").url("http://b.com")
       val license = new License().name("z").url("http://b.com/license")
-      val testInfo = new Info().contact(contact).description("desc").license(license)
-        .termsOfService("T&C").title("Title").version("0.1")
+      val testInfo = new Info()
+        .contact(contact)
+        .description("desc")
+        .license(license)
+        .termsOfService("T&C")
+        .title("Title")
+        .version("0.1")
       val securitySchemeDefinition = new BasicAuthDefinition()
       val edocs = new ExternalDocs().description("edesc").url("http://b.com/docs")
       val generator = new SwaggerGenerator {

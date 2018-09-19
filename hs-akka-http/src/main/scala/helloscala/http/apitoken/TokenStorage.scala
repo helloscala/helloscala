@@ -26,6 +26,7 @@ import scala.concurrent.Future
  * Created by yangbajing(yangbajing@gmail.com) on 2017-03-30.
  */
 trait TokenStorage[T] {
+
   /**
    * 判断 ApiTokenInput 是否有效
    *

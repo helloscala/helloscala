@@ -36,14 +36,18 @@ trait InjectSpec extends BeforeAndAfterAll with InjectSystemSupport {
 
   protected def configuration: Configuration = instance[Configuration]
 
-  protected implicit def executionContext: ExecutionContext = instance[ExecutionContext]
+  implicit protected def executionContext: ExecutionContext =
+    instance[ExecutionContext]
 
-  protected implicit def actorMaterializer: ActorMaterializer = instance[ActorMaterializer]
+  implicit protected def actorMaterializer: ActorMaterializer =
+    instance[ActorMaterializer]
 
-  protected implicit lazy val httpSourceQueue: SourceQueueWithComplete[(HttpRequest, Promise[HttpResponse])] =
+  implicit protected lazy val httpSourceQueue: SourceQueueWithComplete[(HttpRequest, Promise[HttpResponse])] =
     configuration.get[Option[Int]]("server.https-port") match {
-      case Some(httpsPort) => HttpUtils.cachedHostConnectionPoolHttps(configuration.getString("server.host"), httpsPort)
-      case _               => HttpUtils.cachedHostConnectionPool(configuration.getString("server.host"), configuration.getInt("server.port"))
+      case Some(httpsPort) =>
+        HttpUtils.cachedHostConnectionPoolHttps(configuration.getString("server.host"), httpsPort)
+      case _ =>
+        HttpUtils.cachedHostConnectionPool(configuration.getString("server.host"), configuration.getInt("server.port"))
     }
 
   override protected def afterAll(): Unit = {

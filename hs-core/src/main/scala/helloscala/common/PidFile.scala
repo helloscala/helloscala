@@ -35,7 +35,8 @@ class PidFile(val pid: Long) {
    * @param deleteOnExit if <code>true</code> the pid file is deleted with best effort on system exit
    */
   @throws[IOException]("if an IOException occurs")
-  def create(path: Path, deleteOnExit: Boolean): PidFile = create(path, deleteOnExit, HSCommons.getPid)
+  def create(path: Path, deleteOnExit: Boolean): PidFile =
+    create(path, deleteOnExit, HSCommons.getPid)
 
   @throws[IOException]
   def create(path: Path, deleteOnExit: Boolean, pid: Long): PidFile = {

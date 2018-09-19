@@ -27,6 +27,7 @@ import org.bouncycastle.util.encoders.Hex
 import scala.concurrent.Future
 
 object MessageDigestAlgorithms {
+
   /**
    * The MD5 message digest algorithm defined in RFC 1321.
    */
@@ -54,11 +55,14 @@ object DigestUtils {
     MessageDigest.getInstance(MessageDigestAlgorithms.MD5)
   }
 
-  def digestSha1(): MessageDigest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_1)
+  def digestSha1(): MessageDigest =
+    MessageDigest.getInstance(MessageDigestAlgorithms.SHA_1)
 
-  def digestSha256(): MessageDigest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+  def digestSha256(): MessageDigest =
+    MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
 
-  def digestSha512(): MessageDigest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_512)
+  def digestSha512(): MessageDigest =
+    MessageDigest.getInstance(MessageDigestAlgorithms.SHA_512)
 
   def md5(data: Array[Byte]): Array[Byte] = {
     val digest = digestMD5()

@@ -31,7 +31,8 @@ object Crypto extends StrictLogging {
   val KEY_SPEC_NAME = "AES"
 
   @deprecated("使用 signHmacSHA1Hex 代替", "1.0.2")
-  def sign_HmacSHA1_hex(message: String, secret: String): String = signHmacSHA1Hex(message, secret)
+  def sign_HmacSHA1_hex(message: String, secret: String): String =
+    signHmacSHA1Hex(message, secret)
 
   def signHmacSHA1Hex(message: String, secret: String): String = {
     val key = secret.getBytes("UTF-8")
@@ -41,17 +42,21 @@ object Crypto extends StrictLogging {
   }
 
   @deprecated("使用 signHmacSHA256Base64 代替", "1.0.2")
-  def sign_HmacSHA256_base64(message: String, secret: String): String = signHmacSHA256Base64(message, secret)
+  def sign_HmacSHA256_base64(message: String, secret: String): String =
+    signHmacSHA256Base64(message, secret)
 
   def signHmacSHA256Base64(message: String, secret: String): String = {
     val key = secret.getBytes("UTF-8")
     val mac = Mac.getInstance("HmacSHA256")
     mac.init(new SecretKeySpec(key, "HmacSHA256"))
-    Base64.getUrlEncoder.withoutPadding().encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)))
+    Base64.getUrlEncoder
+      .withoutPadding()
+      .encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)))
   }
 
   @deprecated("使用 encryptAES 代替", "1.0.2")
-  def encrypt_AES(value: String, secret: String): String = encryptAES(value, secret)
+  def encrypt_AES(value: String, secret: String): String =
+    encryptAES(value, secret)
 
   def encryptAES(value: String, secret: String): String = {
     val raw = util.Arrays.copyOf(secret.getBytes(StandardCharsets.UTF_8), 16)
@@ -62,7 +67,8 @@ object Crypto extends StrictLogging {
   }
 
   @deprecated("使用 decryptAES 代替", "1.0.2")
-  def decrypt_AES(value: String, secret: String): String = decryptAES(value, secret)
+  def decrypt_AES(value: String, secret: String): String =
+    decryptAES(value, secret)
 
   def decryptAES(value: String, secret: String): String = {
     val raw = util.Arrays.copyOf(secret.getBytes(StandardCharsets.UTF_8), 16)

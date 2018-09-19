@@ -27,11 +27,13 @@ trait SessionEncoder[T] {
 }
 
 object SessionEncoder {
+
   /**
    * Default low-priority implicit encoder. If you wish to use another one, provide an implicit encoder in a
    * higher-priority implicit scope, e.g. as an implicit value declared next to `SessionManager`.
    */
-  implicit def basic[T](implicit serializer: SessionSerializer[T, String]) = new BasicSessionEncoder[T]()
+  implicit def basic[T](implicit serializer: SessionSerializer[T, String]) =
+    new BasicSessionEncoder[T]()
 }
 
 case class DecodeResult[T](t: T, expires: Option[Long], signatureMatches: Boolean)
@@ -50,7 +52,10 @@ class BasicSessionEncoder[T](implicit serializer: SessionSerializer[T, String]) 
       s"$expiry-$serialized"
     }
 
-    val encrypted = if (config.sessionEncryptData) Crypto.encryptAES(withExpiry, config.serverSecret) else withExpiry
+    val encrypted =
+      if (config.sessionEncryptData)
+        Crypto.encryptAES(withExpiry, config.serverSecret)
+      else withExpiry
 
     s"${Crypto.signHmacSHA1Hex(withExpiry, config.serverSecret)}-$encrypted"
   }
@@ -65,13 +70,15 @@ class BasicSessionEncoder[T](implicit serializer: SessionSerializer[T, String]) 
 
     Try {
       val splitted = s.split("-", 2)
-      val decrypted = if (config.sessionEncryptData) Crypto.decryptAES(splitted(1), config.serverSecret) else splitted(1)
+      val decrypted =
+        if (config.sessionEncryptData)
+          Crypto.decryptAES(splitted(1), config.serverSecret)
+        else splitted(1)
 
       val (expiry, serialized) = extractExpiry(decrypted)
 
-      val signatureMatches = SessionUtil.constantTimeEquals(
-        splitted(0),
-        Crypto.signHmacSHA1Hex(decrypted, config.serverSecret))
+      val signatureMatches =
+        SessionUtil.constantTimeEquals(splitted(0), Crypto.signHmacSHA1Hex(decrypted, config.serverSecret))
 
       serializer.deserialize(serialized.substring(1)).map {
         DecodeResult(_, expiry, signatureMatches)

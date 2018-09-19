@@ -31,18 +31,24 @@ trait SchemasTrait {
   val appLifecycle: AppLifecycle
   val configuration: Configuration
 
-  protected val confMaxConnectionsPath = "helloscala.persistence.datasource.maxConnections"
-  protected val confKeepAliveConnectionPath = "helloscala.persistence.datasource.keepAliveConnection"
-  protected val confNumThreadsPath = "helloscala.persistence.datasource.numThreads"
-  protected val confQueueSizePath = "helloscala.persistence.datasource.queueSize"
+  protected val confMaxConnectionsPath =
+    "helloscala.persistence.datasource.maxConnections"
+  protected val confKeepAliveConnectionPath =
+    "helloscala.persistence.datasource.keepAliveConnection"
+  protected val confNumThreadsPath =
+    "helloscala.persistence.datasource.numThreads"
+  protected val confQueueSizePath =
+    "helloscala.persistence.datasource.queueSize"
 
   val db = Database.forDataSource(
     dataSource,
     configuration.get[Option[Int]](confMaxConnectionsPath),
-    executor = AsyncExecutor(
-      "helloscala",
-      configuration.get[Option[Int]](confNumThreadsPath).getOrElse(20),
-      configuration.get[Option[Int]](confQueueSizePath).getOrElse(1000)),
-    keepAliveConnection = configuration.get[Option[Boolean]](confKeepAliveConnectionPath).getOrElse(false))
+    executor = AsyncExecutor("helloscala",
+                             configuration.get[Option[Int]](confNumThreadsPath).getOrElse(20),
+                             configuration.get[Option[Int]](confQueueSizePath).getOrElse(1000)),
+    keepAliveConnection = configuration
+      .get[Option[Boolean]](confKeepAliveConnectionPath)
+      .getOrElse(false)
+  )
   appLifecycle.addStopHook(() => Future.successful(db.close()))
 }

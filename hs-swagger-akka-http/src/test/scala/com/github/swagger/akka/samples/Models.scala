@@ -39,10 +39,7 @@ object SwaggerModelBuilderSpecValues {
 }
 
 @ApiModel(description = "an entry in the dictionary")
-case class DictEntry(
-    val key: String,
-    val value: String,
-    val expire: Option[Long])
+case class DictEntry(val key: String, val value: String, val expire: Option[Long])
 
 import com.github.swagger.akka.samples.SwaggerModelBuilderSpecValues._
 
@@ -55,9 +52,7 @@ case class TestModelWithWrongAnnotation()
 case class TestModelEmptyAnnotation()
 
 @ApiModel
-sealed trait TestModelParent {
-
-}
+sealed trait TestModelParent {}
 
 @ApiModel(description = TestModelDescription)
 case class TestModel(
@@ -66,14 +61,14 @@ case class TestModel(
     @(ApiModelProperty @field)(value = IsStaleDescription) isStale: Boolean,
     @(ApiModelProperty @field)(value = OffsetDescription) offset: Option[Int] = None,
     @(ApiModelProperty @field)(value = NodesDescription) nodes: List[TestModelNode] = List[TestModelNode](),
-    @(ApiModelProperty @field)(
-      value = EnumDescription,
-      dataType = "com.github.swagger.akka.samples.TestEnum$") testEnum: TestEnum.TestEnum = TestEnum.AEnum,
+    @(ApiModelProperty @field)(value = EnumDescription, dataType = "com.github.swagger.akka.samples.TestEnum$") testEnum: TestEnum.TestEnum =
+      TestEnum.AEnum,
     @(ApiModelProperty @field)(value = StartDateDescription) startDate: Date,
     @(ApiModelProperty @field)(value = EndDateDescription) endDate: LocalDateTime,
     noAnnotationProperty: String,
     secondNoAnnotationProperty: String,
-    @(ApiModelProperty @field)(value = AllowableDescription, allowableValues = "first, second") allowable: String) extends TestModelParent
+    @(ApiModelProperty @field)(value = AllowableDescription, allowableValues = "first, second") allowable: String)
+    extends TestModelParent
 
 @ApiModel(description = TestModelDescription)
 case class ModelWithCustomPropertyDatatypes(
@@ -82,22 +77,24 @@ case class ModelWithCustomPropertyDatatypes(
     @(ApiModelProperty @field)(value = OffsetDescription, dataType = "list[integer]") offset: Iterable[(Int, Boolean)],
     @(ApiModelProperty @field)(value = EndDateDescription, dataType = "date", required = false) endDate: Option[String],
     @(ApiModelProperty @field)(value = AmountDescription, dataType = "double") amount: BigDecimal
-/*
+    /*
   @(ApiModelProperty @field)(value = NameDescription, dataType = "CustomType", required = false)
   nonDefaultTypeField: Option[String]
   @(ApiModelProperty @field)(value = NameDescription, dataType = "CustomContainer[string]", required = false)
   nonDefaultContainerTypeField: Option[String],
-*/
+ */
 )
 
 @ApiModel(description = "description for ModelBase")
 class ModelBase {
+
   @(ApiModelProperty @field)(value = NameDescription)
   val name: String = ""
 }
 
 @ApiModel(description = "description for ModelExtension", parent = classOf[ModelBase])
 class ModelExtension extends ModelBase {
+
   @(ApiModelProperty @field)(value = EndDateDescription)
   val date: Date = new java.util.Date()
 }
@@ -110,14 +107,12 @@ object TestEnum extends Enumeration {
 }
 
 @ApiModel
-case class TestModelNode(
-    value: Option[String])
+case class TestModelNode(value: Option[String])
 
 case class A() extends Letter
 case class B() extends Letter
 
-@ApiModel(
-  subTypes = Array(classOf[String], classOf[B]))
+@ApiModel(subTypes = Array(classOf[String], classOf[B]))
 abstract class Letter
 
 @ApiModel
@@ -131,8 +126,8 @@ case class TestModelPositions(
 case class ListReply[T](
     @(ApiModelProperty @field)(value = "List of requested items (in current page if paged)") items: List[T],
     @(ApiModelProperty @field)(value = "Total number of items in the reply (across all pages if applicable)") total: Int,
-    @(ApiModelProperty @field)(
-      value = "Identifier used to fetch the next page of results",
-      dataType = "string") nextPageToken: Option[String],
+    @(ApiModelProperty @field)(value = "Identifier used to fetch the next page of results", dataType = "string") nextPageToken: Option[
+      String],
     @(ApiModelProperty @field)(value = "Offset within the total count of results where this current items list starts") offset: Int,
-    @(ApiModelProperty @field)(value = "Limit on the number of items included in a single response page", dataType = "int") limit: Option[Int])
+    @(ApiModelProperty @field)(value = "Limit on the number of items included in a single response page",
+                               dataType = "int") limit: Option[Int])

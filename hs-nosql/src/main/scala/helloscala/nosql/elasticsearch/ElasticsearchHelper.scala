@@ -42,9 +42,11 @@ class ElasticsearchHelper {
     userPassTuple
       .map({
         case (username, password) =>
-          XPackElasticClient(
-            Settings.builder().put("xpack.security.user", s"$username:$password").build(),
-            clientUri)
+          XPackElasticClient(Settings
+                               .builder()
+                               .put("xpack.security.user", s"$username:$password")
+                               .build(),
+                             clientUri)
       })
       .getOrElse(TcpClient.transport(clientUri))
   }

@@ -21,6 +21,7 @@ import akka.http.scaladsl.server.{Directive0, Directive1}
 import akka.stream.Materializer
 
 trait CsrfDirectives {
+
   /**
    * Protects against CSRF attacks using a double-submit cookie. The cookie will be set on any `GET` request which
    * doesn't have the token set in the header. For all other requests, the value of the token from the CSRF cookie must
@@ -41,7 +42,8 @@ trait CsrfDirectives {
             if (submitted == cookie) {
               pass
             } else {
-              reject(checkMode.csrfManager.tokenInvalidRejection).toDirective[Unit]
+              reject(checkMode.csrfManager.tokenInvalidRejection)
+                .toDirective[Unit]
             }
           }
         }
@@ -55,7 +57,6 @@ trait CsrfDirectives {
     headerValueByName(checkMode.manager.config.csrfSubmittedName).recover { rejections =>
       checkMode match {
         case c: CheckHeaderAndForm[T] =>
-
           formField(checkMode.manager.config.csrfSubmittedName)
         case _ => reject(rejections: _*)
       }
@@ -63,7 +64,8 @@ trait CsrfDirectives {
   }
 
   def csrfTokenFromCookie[T](checkMode: CsrfCheckMode[T]): Directive1[Option[String]] =
-    optionalCookie(checkMode.manager.config.csrfCookieConfig.name).map(_.map(_.value))
+    optionalCookie(checkMode.manager.config.csrfCookieConfig.name)
+      .map(_.map(_.value))
 
   def setNewCsrfToken[T](checkMode: CsrfCheckMode[T]): Directive0 =
     setCookie(checkMode.csrfManager.createCookie())
@@ -76,12 +78,18 @@ sealed trait CsrfCheckMode[T] {
   def csrfManager = manager.csrfManager
 }
 class CheckHeader[T] private[session] (implicit val manager: SessionManager[T]) extends CsrfCheckMode[T]
-class CheckHeaderAndForm[T] private[session] (implicit
+
+class CheckHeaderAndForm[T] private[session] (
+    implicit
     val manager: SessionManager[T],
-    val materializer: Materializer) extends CsrfCheckMode[T]
+    val materializer: Materializer)
+    extends CsrfCheckMode[T]
 
 object CsrfOptions {
-  def checkHeader[T](implicit manager: SessionManager[T]): CheckHeader[T] = new CheckHeader[T]()
+
+  def checkHeader[T](implicit manager: SessionManager[T]): CheckHeader[T] =
+    new CheckHeader[T]()
+
   def checkHeaderAndForm[T](implicit manager: SessionManager[T], materializer: Materializer): CheckHeaderAndForm[T] =
     new CheckHeaderAndForm[T]()
 }

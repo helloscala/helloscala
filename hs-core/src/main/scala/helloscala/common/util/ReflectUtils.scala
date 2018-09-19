@@ -34,7 +34,8 @@ case class Person(name: String, age: Int)
  */
 class ReflectUtils extends StrictLogging {
 
-  lazy val mirror: universe.Mirror = universe.runtimeMirror(Thread.currentThread().getContextClassLoader)
+  lazy val mirror: universe.Mirror =
+    universe.runtimeMirror(Thread.currentThread().getContextClassLoader)
 
   def getUniverseType(className: String): universe.Type = {
     val sym = mirror.staticClass(className)
@@ -83,7 +84,8 @@ class ReflectUtils extends StrictLogging {
           false
         } else {
           val name = path.getFileName.toString
-          name.endsWith(".class") && !name.endsWith("$.class") && !name.contains("$$")
+          name.endsWith(".class") && !name.endsWith("$.class") && !name
+            .contains("$$")
         }
       }
     }
@@ -107,7 +109,8 @@ class ReflectUtils extends StrictLogging {
   private def listPathnameFromPackageByZip(pkg: String, dir: String, path: String): List[String] = {
     def filter(entry: ZipEntry): Boolean = {
       val name = entry.getName
-      !entry.isDirectory && name.startsWith(dir) && name.endsWith(".class") && !name.endsWith("$.class") && !name.contains("$$")
+      !entry.isDirectory && name.startsWith(dir) && name.endsWith(".class") && !name
+        .endsWith("$.class") && !name.contains("$$")
     }
 
     val bangIndex = path.indexOf('!')

@@ -24,7 +24,11 @@ import scala.concurrent.{ExecutionContext, Future}
 trait CacheMemorySupport extends CacheSupport {
   protected val enableCache: Boolean = true
   protected val MAXIMUM_SIZE: Int = 1024
-  protected val cache: Cache[CacheKey, CacheValue] = CacheBuilder.newBuilder().maximumSize(MAXIMUM_SIZE).build().asInstanceOf[Cache[CacheKey, CacheValue]]
+  protected val cache: Cache[CacheKey, CacheValue] = CacheBuilder
+    .newBuilder()
+    .maximumSize(MAXIMUM_SIZE)
+    .build()
+    .asInstanceOf[Cache[CacheKey, CacheValue]]
 
   override def saveCache(key: CacheKey, value: CacheValue): Unit = {
     if (enableCache) {
@@ -32,20 +36,19 @@ trait CacheMemorySupport extends CacheSupport {
     }
   }
 
-  override def getCache(key: CacheKey): Option[CacheValue] = if (enableCache) Option(cache.getIfPresent(key)) else None
+  override def getCache(key: CacheKey): Option[CacheValue] =
+    if (enableCache) Option(cache.getIfPresent(key)) else None
 
-  override def findCacheDirect(
-      key: CacheKey,
-      func: () => Future[CacheValue])(implicit ec: ExecutionContext): Future[CacheValue] = {
+  override def findCacheDirect(key: CacheKey, func: () => Future[CacheValue])(
+      implicit ec: ExecutionContext): Future[CacheValue] = {
     findCache(key, () => func().map(v => Some(v))).flatMap {
       case Some(value) => Future.successful(value)
       case None        => Future.failed(HSNotFoundException(s"缓存资源未找到，key: $key"))
     }
   }
 
-  override def findCache(
-      key: CacheKey,
-      func: () => Future[Option[CacheValue]])(implicit ec: ExecutionContext): Future[Option[CacheValue]] = {
+  override def findCache(key: CacheKey, func: () => Future[Option[CacheValue]])(
+      implicit ec: ExecutionContext): Future[Option[CacheValue]] = {
     if (enableCache)
       getCache(key) match {
         case v @ Some(_) => Future.successful(v)
@@ -54,13 +57,10 @@ trait CacheMemorySupport extends CacheSupport {
             maybe.foreach(value => saveCache(key, value))
             maybe
           }
-      }
-    else
+      } else
       func()
   }
 
 }
 
-object CacheMemorySupport {
-
-}
+object CacheMemorySupport {}

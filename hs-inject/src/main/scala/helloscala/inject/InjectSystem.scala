@@ -31,7 +31,9 @@ object InjectSystem {
   lazy val injector: Injector = Guice.createInjector(generateModules(): _*)
 
   private def generateModules() =
-    InternalConfig.config.getStringList(MODULES_PATH).asScala
+    InternalConfig.config
+      .getStringList(MODULES_PATH)
+      .asScala
       .distinct
       .filter(s => StringUtils.isNoneBlank(s))
       .map(t => Class.forName(t).newInstance().asInstanceOf[Module])
@@ -42,7 +44,8 @@ object InjectSystem {
    * @tparam T ClassTag[T]
    * @return
    */
-  def instance[T](implicit ev: ClassTag[T]): T = injector.getInstance(ev.runtimeClass).asInstanceOf[T]
+  def instance[T](implicit ev: ClassTag[T]): T =
+    injector.getInstance(ev.runtimeClass).asInstanceOf[T]
 
   /**
    * 根据类型及注解获取类实例
@@ -74,19 +77,22 @@ object InjectSystem {
    * @param a 命名注解
    * @return
    */
-  def getInstance[T](c: Class[T], a: Named): T = injector.getInstance(Key.get(c, a)).asInstanceOf[T]
+  def getInstance[T](c: Class[T], a: Named): T =
+    injector.getInstance(Key.get(c, a)).asInstanceOf[T]
 }
 
 trait InjectSystemSupport {
 
   def instance[T](implicit ev: ClassTag[T]): T = InjectSystem.instance[T]
 
-  def instance[T](a: Named)(implicit ev: ClassTag[T]): T = InjectSystem.instance[T](a)
+  def instance[T](a: Named)(implicit ev: ClassTag[T]): T =
+    InjectSystem.instance[T](a)
 
   def getInstance[T](c: Class[T]): T = InjectSystem.getInstance(c)
 
   def getInstance[T](key: Key[T]): T = InjectSystem.getInstance(key)
 
-  def getInstance[T](c: Class[T], a: Named): T = InjectSystem.getInstance(Key.get(c, a))
+  def getInstance[T](c: Class[T], a: Named): T =
+    InjectSystem.getInstance(Key.get(c, a))
 
 }
